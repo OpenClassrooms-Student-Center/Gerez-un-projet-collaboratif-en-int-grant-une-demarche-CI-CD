@@ -18,7 +18,7 @@ public class JokeController {
     }
 
     @GetMapping()
-    public ResponseEntity<?> getMedicalRecords() {
+    public ResponseEntity<?> getRandomJokes() {
         return ResponseEntity.ok(this.jokeService.getRandomJoke());
     }
 }

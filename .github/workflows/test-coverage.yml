@@ -19,4 +19,4 @@ jobs:
         run: npm install
       - name: Run Coverage frontend
         working-directory: ./front
-        run: ng test --code-coverage
+        run: npm run test --code-coverage

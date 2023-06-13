@@ -14,6 +14,6 @@ jobs:
       - name: Run Coverage backend
         working-directory: ./back
         run: mvn test
-      - name: Build the Docker image of frontend
+      - name: Run Coverage frontend
         working-directory: ./front
         run: ng test --code-coverage

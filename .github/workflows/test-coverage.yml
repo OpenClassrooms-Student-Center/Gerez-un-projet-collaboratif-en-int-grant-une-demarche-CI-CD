@@ -1,0 +1,2 @@
+- name: Test Reporting
+  uses: phoenix-actions/test-reporting@v12

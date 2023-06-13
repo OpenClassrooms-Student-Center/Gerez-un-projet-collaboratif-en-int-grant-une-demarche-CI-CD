@@ -14,6 +14,9 @@ jobs:
       - name: Run Coverage backend
         working-directory: ./back
         run: mvn test
+      - name: npm dependencies
+        working-directory: ./front
+        run: npm install
       - name: Run Coverage frontend
         working-directory: ./front
-        run: npm run test --code-coverage
+        run: ng test --code-coverage

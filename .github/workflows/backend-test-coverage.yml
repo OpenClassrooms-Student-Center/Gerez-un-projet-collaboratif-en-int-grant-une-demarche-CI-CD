@@ -1,0 +1,30 @@
+name: Backend run tests & Jacoco report
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: "11"
+
+      - name: Build with Maven
+        run: mv back/ && mvn clean install
+      
+      - name: Run tests and generate Jacoco report
+        run: mvn test jacoco:report
+      
+      - name: Upload Jacoco report artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: jacoco-report
+          path: back/target/site/jacoco/index.html

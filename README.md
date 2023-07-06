@@ -54,4 +54,20 @@ Build the container:
 
 Start the container:
 
-> docker run -p 8080:8080 --name bobapp-back -d bobapp-back 
+> docker run -p 8080:8080 --name bobapp-back -d bobapp-back
+
+### CI
+
+Back build and test
+
+> GitHub actions : .github/workflows/maven.yml
+
+
+
+
+
+
+
+
+
+

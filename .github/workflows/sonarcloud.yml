@@ -52,9 +52,9 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
 
-      - name: Build with Maven
+      - name: Run tests and generate JaCoCo report
         working-directory: back
-        run: mvn -B package --file pom.xml
+        run: mvn -B clean verify
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

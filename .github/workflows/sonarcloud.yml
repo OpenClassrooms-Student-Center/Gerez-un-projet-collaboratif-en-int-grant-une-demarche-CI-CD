@@ -44,4 +44,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Zagrios_Gerez-un-projet-collaboratif-en-int-grant-une-demarche-CI-C
+        run: mvn -B verify --file ./back/pom.xml org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=Zagrios_Gerez-un-projet-collaboratif-en-int-grant-une-demarche-CI-C -Dsonar.qualitygate.wait=true

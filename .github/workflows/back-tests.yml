@@ -1,4 +1,4 @@
-name: Front Tests and Reports
+name: Back Tests and Reports
 
 on:
   push:

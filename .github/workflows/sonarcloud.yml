@@ -23,8 +23,8 @@ jobs:
           node-version: 16
 
       - name: Cache dependencies
-        uses: actions/cache@v3
         working-directory: front
+        uses: actions/cache@v3
         with:
           path: node_modules
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}

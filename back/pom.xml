@@ -20,6 +20,8 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webflux</artifactId>
+			<sonar.organization>thomasbtr-1</sonar.organization>
+			<sonar.host.url>https://sonarcloud.io</sonar.host.url>
 		</dependency>
 
 		<dependency>

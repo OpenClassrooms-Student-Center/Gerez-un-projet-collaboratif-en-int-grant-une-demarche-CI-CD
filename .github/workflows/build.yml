@@ -4,8 +4,6 @@ on:
   push:
     branches-ignore:
       - master
-  pull-request:
-    types: [opened, synchronize, reopened]
 jobs:
   backend:
     name: Build, Test and coverage Back End

@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ng-toolkit
+        working-directory: front
     strategy:
       matrix:
         node-version: [18.17.1]

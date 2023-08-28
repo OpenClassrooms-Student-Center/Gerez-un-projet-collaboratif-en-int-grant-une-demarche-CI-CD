@@ -35,6 +35,8 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Install Angular
+        run: npm install
       - name: Test & Coverage back
         run: npm run test
       - run: echo "🍏 This job's status is ${{ job.status }}."

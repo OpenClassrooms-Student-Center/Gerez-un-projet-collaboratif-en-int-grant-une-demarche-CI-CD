@@ -16,9 +16,7 @@ jobs:
           distribution: 'temurin'
       - name: Checkout
         uses: actions/checkout@v3
-      - name : move to backend folder
-        run: cd back
       - name: Test & Coverage back
-        run: mvn -B -U verify
+        run: mvn -B -U verify --file back/pom.xml
       - run: echo "🍏 This job's status is ${{ job.status }}."
 

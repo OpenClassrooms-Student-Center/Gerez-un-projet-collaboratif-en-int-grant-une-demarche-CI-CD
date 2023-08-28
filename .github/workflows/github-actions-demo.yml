@@ -38,7 +38,7 @@ jobs:
       - name: Install Angular
         run: npm ci
       - name: Test & Coverage front end
-        run: ng test --browsers ChromeHeadless --code-coverage
+        run: npm run test-headless
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
 

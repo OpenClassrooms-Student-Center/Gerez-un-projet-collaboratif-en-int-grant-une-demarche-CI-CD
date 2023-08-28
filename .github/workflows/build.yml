@@ -6,7 +6,7 @@ on:
       - master
 jobs:
   backend:
-    name: Build, Test and coverage Back End
+    name: Build, Test and coverage Back & front end
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -37,7 +37,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install Angular
-        run: npm --prefix ci
+        run: npm --prefix front ci
       - name: Test & Coverage front end
         run: npm run --prefix front test-headless
       - name: SonarCloud Scan

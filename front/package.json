@@ -7,7 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test-headless": "ng test --browsers ChromeHeadless --code-coverage --no-watch"
+    "test-headless": "ng test --browsers ChromeHeadless --code-coverage --no-watch",
+    "sonar": "sonar-scanner"
   },
   "private": true,
   "dependencies": {
@@ -36,6 +37,7 @@
     "karma-coverage": "2.2.0",
     "karma-jasmine": "5.1.0",
     "karma-jasmine-html-reporter": "2.0.0",
+    "sonar-scanner": "^3.1.0",
     "typescript": "4.8.2"
   }
 }

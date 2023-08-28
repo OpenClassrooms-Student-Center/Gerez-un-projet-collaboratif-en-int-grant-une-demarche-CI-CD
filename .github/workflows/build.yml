@@ -25,10 +25,14 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: Build and analyze
+        run: mvn -B -U -ntp verify -f back/pom.xml
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: front
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: mvn -B -U -ntp verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ThomasBTR_Gerez-un-projet-collaboratif-en-int-grant-une-demarche-CI-CD -f back/pom.xml
       - run: echo "🍏 This job's status is ${{ job.status }}."
   frontend:
     name: Build, Test and coverage Front End

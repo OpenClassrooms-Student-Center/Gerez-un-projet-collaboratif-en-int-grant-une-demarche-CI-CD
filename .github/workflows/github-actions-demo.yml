@@ -1,5 +1,5 @@
 name: Build, Test & Coverage
-run-name: ${{ github.actor }} is testing The application 🚀
+run-name: ${{ github.actor }} is testing BobApp 🚀
 on:
   push:
     branches-ignore:
@@ -16,7 +16,7 @@ jobs:
           distribution: 'temurin'
       - name: Checkout
         uses: actions/checkout@v3
-      - name: Test & Coverage back
+      - name: Test & Coverage back end
         run: mvn -B -U verify --file back/pom.xml
       - run: echo "🍏 This job's status is ${{ job.status }}."
   frontend:
@@ -36,9 +36,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install Angular
-        run: npm install
-      - name: Test & Coverage back
-        run: npm run test
+        run: npm ci
+      - name: Test & Coverage front end
+        run: ng test --browsers ChromeHeadless --code-coverage
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
 

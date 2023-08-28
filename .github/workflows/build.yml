@@ -52,6 +52,11 @@ jobs:
         run: npm ci
       - name: Test & Coverage front end
         run: npm run test-headless
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
 
 

@@ -2,8 +2,6 @@ name: Build, Test & Coverage
 run-name: ${{ github.actor }} is testing BobApp 🚀
 on:
   push:
-    branches-ignore:
-      - master
 jobs:
   backend:
     name: Build, Test and coverage Back End
@@ -24,12 +22,12 @@ jobs:
           path: ~/.sonar/cache
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
-      - name: Build and analyze
+      - name: Build and analyze with  SonarCloud Scan
         run: mvn -B -U -ntp verify -f back/pom.xml
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         with:
-          projectBaseDir: front
+          projectBaseDir: back
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

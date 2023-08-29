@@ -23,7 +23,7 @@ jobs:
           key: ${{ runner.os }}-sonar
           restore-keys: ${{ runner.os }}-sonar
       - name: Build and analyze with  SonarCloud Scan
-        run: mvn -B -U -ntp verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=ThomasBTR_Gerez-un-projet-collaboratif-en-int-grant-une-demarche-CI-CD -f back/pom.xml
+        run: mvn -B -U -ntp verify verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=thomasbtr-1_Gerez-un-projet-collaboratif-en-int-grant-une-demarche-CI-CD -f back/pom.xml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

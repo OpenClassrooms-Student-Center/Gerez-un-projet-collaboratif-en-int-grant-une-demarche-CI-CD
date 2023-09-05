@@ -1,7 +1,7 @@
 name: Push Docker container 
 on:
    workflow_run:
-    workflows: ["Frontend Test", "Backend Test", "Code Quality"]
+    workflows: ["Frontend Tests Coverage", "Backend Test", "Code Quality"]
     types:
       - completed
 

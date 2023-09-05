@@ -19,13 +19,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Change directory to "front"
+      run: cd front
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - name: Change directory to "front"
-      run: cd front
+
     - run: npm ci
     - run: npm build --if-present
     - run: ng test

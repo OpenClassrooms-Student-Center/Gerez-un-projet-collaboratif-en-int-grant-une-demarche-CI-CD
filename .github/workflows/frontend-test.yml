@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./front
+        working-directory: .
     strategy:
       matrix:
         node-version: [16.x]
@@ -22,6 +22,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - name: Select Front Directory
+      run: ls
+      working-directory: ./front
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:

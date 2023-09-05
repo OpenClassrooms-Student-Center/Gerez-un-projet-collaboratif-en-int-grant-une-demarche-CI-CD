@@ -26,8 +26,7 @@ jobs:
         cache: 'npm'
         cache-dependency-path: '**/package-lock.json'
     - name: Installing Deps
+      working-directory: front
       run: |
-        cd front
         npm ci
-    - run: npm build --if-present
-    - run: ng test
+        npm run test

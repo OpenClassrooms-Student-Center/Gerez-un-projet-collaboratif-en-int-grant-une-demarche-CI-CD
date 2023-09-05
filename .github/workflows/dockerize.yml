@@ -1,0 +1,25 @@
+name: Push Docker container 
+on:
+   workflow_run:
+    workflows: ["Frontend Tests Coverage", "Backend Test", "Code Quality"]
+    types:
+      - completed
+
+jobs:
+  Backend-Image:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: |
+        cd back
+        docker build . --file Dockerfile --tag BobApp-backend:$(date +%s)
+
+  Frontend-Image:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Build the Docker image
+      run: |
+        cd front
+        docker build . --file Dockerfile --tag BobApp-frontend:$(date +%s)

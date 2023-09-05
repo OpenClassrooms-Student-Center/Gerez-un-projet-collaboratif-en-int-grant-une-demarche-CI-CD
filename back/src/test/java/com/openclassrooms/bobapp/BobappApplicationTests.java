@@ -15,4 +15,9 @@ class BobappApplicationTests {
   void ensureTest(){
     assertTrue(true);
   }
+
+  @Test
+  void ensureTest2(){
+    assertTrue(true);
+  }
 }

@@ -24,7 +24,8 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-    - name: Install Dependancies
+    - name: Change directory to "front"
+      run: cd front
     - run: npm ci
     - run: npm build --if-present
     - run: ng test

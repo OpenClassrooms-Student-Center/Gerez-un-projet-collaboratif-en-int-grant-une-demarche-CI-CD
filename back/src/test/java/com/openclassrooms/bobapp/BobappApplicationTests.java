@@ -10,4 +10,8 @@ class BobappApplicationTests {
 	void contextLoads() {
 	}
 
+  @Test 
+  void ensureTest(){
+    assertTrue(true);
+  }
 }

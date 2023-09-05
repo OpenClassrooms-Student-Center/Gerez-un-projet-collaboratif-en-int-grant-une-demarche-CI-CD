@@ -1,7 +1,7 @@
 name: Github Actions Demo
 run-name: ${{github.actor}} is testing out Github Actions
 on: [push]
-jobs: 
+jobs:
   Explore Github Actions:
     runs-on: ubuntu-latest
     steps:
@@ -13,6 +13,5 @@ jobs:
       - run: echo "The repo ${{github.repository}} has been cloned to the runner"
       - run: echo "The workflow is now ready to test the code"
       - name: List files in the repository
-        run: | 
-        ls ${{github.workspace}}
+        run: ls ${{github.workspace}}
       - run: echo "The job status is ${{job.status}}"

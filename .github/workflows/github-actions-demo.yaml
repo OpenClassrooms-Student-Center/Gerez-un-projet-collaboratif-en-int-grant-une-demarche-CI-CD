@@ -15,3 +15,4 @@ jobs:
       - name: List files in the repository
         run: ls ${{github.workspace}}
       - run: echo "The job status is ${{job.status}}"
+      - run: echo "done"

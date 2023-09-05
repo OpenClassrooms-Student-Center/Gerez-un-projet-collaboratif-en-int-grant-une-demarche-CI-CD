@@ -29,5 +29,5 @@ jobs:
       working-directory: front
       run: |
         npm ci
-        npm build --if-present
+        npm run build --if-present
         ng test

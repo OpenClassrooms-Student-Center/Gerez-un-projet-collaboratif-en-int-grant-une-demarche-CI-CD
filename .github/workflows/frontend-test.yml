@@ -19,7 +19,7 @@ jobs:
 
     steps:
     - name: Change directory to "front"
-      run: cd ./front
+      run: cd front
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3

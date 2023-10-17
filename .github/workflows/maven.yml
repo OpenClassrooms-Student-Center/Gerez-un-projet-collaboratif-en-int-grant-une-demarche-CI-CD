@@ -7,15 +7,14 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
 
+  build-back:
     runs-on: ${{ matrix.os }}  
-
     strategy:
         matrix:
             os: [ubuntu-latest] # You can add other OS here
 
-    name: Build, Tests and Coverage
+    name: Back CI
     steps:     
     - uses: actions/checkout@v3
     - name: Set up JDK 11
@@ -42,3 +41,43 @@ jobs:
       with:
         name: jacoco-report
         path: back/target/site/jacoco/
+
+
+  build-front:
+    runs-on: ${{ matrix.os }}  
+    strategy:
+        matrix:
+            os: [ubuntu-latest] # You can add other OS here
+
+    name: Front CI
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        path: ~/.npm
+
+    - name: NPM clean install
+      working-directory: front
+      run: npm ci
+
+    - name: build the project
+      working-directory: front
+      run: npm run build
+
+    - name: Unit tests
+      working-directory: front
+      run: |
+        npm install -g @angular/cli
+        ng test --browsers ChromeHeadless --watch=false
+    - name: Coverage tests
+      working-directory: front
+      run: |
+        npm install -g @angular/cli
+        ng test --code-coverage --watch=false --browsers ChromeHeadless
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: front/coverage/bobapp/

@@ -39,4 +39,13 @@ jobs:
     # Étape pour installer les dépendances du projet.
     - run: npm ci
     # Étape pour exécuter les tests
-    - run: npm run test
+    - run: npm run test -- --coverageReporters=junit --coverageDirectory=reports
+
+    # Utilisation de phoenix-actions/test-reporting pour afficher les résultats.
+    - name: Test Report
+      uses: phoenix-actions/test-reporting@v8
+      if: success() || failure()  # run this step even if previous step failed
+      with:
+        name: JEST Tests
+        path: front/reports/jest-*.xml
+        reporter: jest-junit

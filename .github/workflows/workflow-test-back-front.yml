@@ -1,4 +1,4 @@
-name: Java Spring Boot CI with Maven
+name: SpringBoot && Angular CI
 
 on:
   push:

@@ -1,5 +1,5 @@
 # Nom de l'action, il s'affiche dans l'onglet "Actions" de votre repository GitHub.
-name: Java CI with Maven
+name: test-backend
 
 # Définir les événements qui déclenchent cette action.
 # Note: L'action sera déclenchée lors d'un push quelque soit la branche. Ok pour la phase de dev, mais une fois que tout est bien configuré, je pourrais cibler uniquement la branche 'main'.

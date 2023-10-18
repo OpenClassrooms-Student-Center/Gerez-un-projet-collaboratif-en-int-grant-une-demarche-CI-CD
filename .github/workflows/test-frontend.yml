@@ -1,29 +1,42 @@
-# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
-
+# Nom du workflow
 name: test-frontend
 
+# Quand ce workflow doit-il s'exécuter ?
+# Dans ce cas, il s'exécutera à chaque push sur votre dépôt.
 on: [push]
 
 jobs:
   test-frontend:
+    # Indique sur quel type de runner le job doit s'exécuter. Ici, il s'exécutera sur la dernière version d'Ubuntu.
     runs-on: ubuntu-latest
     
+    # Définit les commandes par défaut pour ce job.
+    # Toutes les commandes `run` de ce job s'exécuteront dans le répertoire "front". 
     defaults:
       run:
         working-directory: front
         
+    # La stratégie détermine comment les jobs sont exécutés.
+    # Dans ce cas, une matrice est définie pour tester sur différentes versions de Node.js. 
+    # Cependant, seule la version 16.x est actuellement listée.
     strategy:
       matrix:
         node-version: [16.x]
 
     steps:
+      # Étape pour vérifier le code du dépôt.
     - uses: actions/checkout@v3
+
+    # Étape pour configurer la version souhaitée de Node.js
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+        cache: 'npm'  # Utilisation du cache npm pour accélérer les installations de dépendances.
+        # Spécifie le chemin du fichier de verrouillage des dépendances pour le cache.
         cache-dependency-path: front/package-lock.json
+
+    # Étape pour installer les dépendances du projet.
     - run: npm ci
+    # Étape pour exécuter les tests
     - run: npm run test

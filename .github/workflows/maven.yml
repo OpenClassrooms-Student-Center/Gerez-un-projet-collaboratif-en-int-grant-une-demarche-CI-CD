@@ -1,0 +1,83 @@
+name: Java Spring Boot CI with Maven
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+
+  build-back:
+    runs-on: ${{ matrix.os }}  
+    strategy:
+        matrix:
+            os: [ubuntu-latest] # You can add other OS here
+
+    name: Back CI
+    steps:     
+    - uses: actions/checkout@v3
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        cache: maven
+
+    - name: take the compiled code and package id (compile and test alredy executed in this life sycle).
+      working-directory: back
+      # Batch mode is essential if you need to run Maven in a non-interactive, continuous integration environment. 
+      # When running in non-interactive mode, Maven will never stop to accept input from the user
+      run: mvn -B package --file pom.xml
+
+    - name: Generate JaCoCo Badge
+      uses: cicirello/jacoco-badge-generator@v2
+      with:
+        jacoco-csv-file: back/target/site/jacoco/jacoco.csv
+        generate-branches-badge: true
+
+    - name: Upload JaCoCo coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: jacoco-report
+        path: back/target/site/jacoco/
+
+
+  build-front:
+    runs-on: ${{ matrix.os }}  
+    strategy:
+        matrix:
+            os: [ubuntu-latest] # You can add other OS here
+
+    name: Front CI
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        path: ~/.npm
+
+    - name: NPM clean install
+      working-directory: front
+      run: npm ci
+
+    - name: build the project
+      working-directory: front
+      run: npm run build
+
+    - name: Unit tests
+      working-directory: front
+      run: |
+        npm install -g @angular/cli
+        ng test --browsers ChromeHeadless --watch=false
+    - name: Coverage tests
+      working-directory: front
+      run: |
+        npm install -g @angular/cli
+        ng test --code-coverage --watch=false --browsers ChromeHeadless
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: front/coverage/bobapp/

@@ -35,7 +35,9 @@ jobs:
 
     # Étape pour exécuter le build Maven, incluant les tests et la génération du rapport Jacoco.
     - name: Build with Maven and Run Tests
-      run: mvn clean install
+      run: |
+        cd back
+        mvn clean install
 
     # Étape pour publier le rapport Jacoco sur Codecov (un servie en ligne pour visualiser la couverture de code). 
     - name: Publish Jacoco test report

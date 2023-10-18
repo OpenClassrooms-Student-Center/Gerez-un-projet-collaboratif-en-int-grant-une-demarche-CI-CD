@@ -1,0 +1,51 @@
+# Nom de l'action, il s'affiche dans l'onglet "Actions" de votre repository GitHub.
+name: Java CI with Maven
+
+# Définir les événements qui déclenchent cette action.
+# Note: L'action sera déclenchée lors d'un push quelque soit la branche. Ok pour la phase de dev, mais une fois que tout est bien configuré, je pourrais cibler uniquement la branche 'main'.
+on: [push]
+
+# Définition des jobs à exécuter.
+jobs:
+  # Le nom du job. 'build' est un nom courant.
+  build:
+    # L'environnement d'exécution pour le job.
+    runs-on: ubuntu-latest
+
+    # Étapes du job.
+    steps:
+    # Étape pour récupérer le code source de mon projet sur le runner (i.e. une marchine virtuel) pour que les étapes suivantes du workflow puissent y accéder.
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Étape pour configurer l'environnement avec Java 11 (Le pom.xml du projet indique qu'elle tourne avec la version 11 de Java).
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'adopt'
+        java-version: 11
+
+    # Étape pour mettre en cache les dépendances Maven. Cela accélère les builds ultérieurs. Dans le cas spécifique de Maven, cette action est souvent utilisée pour mettre en cache le répertoire ~/.m2, qui stocke toutes les dépendances Maven téléchargées.
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+
+    # Étape pour exécuter le build Maven, incluant les tests et la génération du rapport Jacoco.
+    - name: Build with Maven and Run Tests
+      run: mvn clean install
+
+    # Étape pour publier le rapport Jacoco sur Codecov (un servie en ligne pour visualiser la couverture de code). 
+    - name: Publish Jacoco test report
+      uses: codecov/codecov-action@v2
+      with:
+        # Si vous utilisez un repository privé, vous devrez fournir un jeton de Codecov.
+        token: ${{ secrets.CODECOV_TOKEN }}
+        # Si l'upload vers Codecov échoue, cette option fera échouer la CI.
+        fail_ci_if_error: true
+        # Une option pour classer les rapports. J'ai choisi 'unittests' comme identifiant pour montrer qu'il s'ait de tests unitaires, mais j'aurai pu le nommer autrement, ou même ne pas utiliser cet attribut.
+        flags: unittests
+        # Le chemin du rapport Jacoco à publier. Note: Une fois le workflow terminé la machine virtuelle est détruite, y compris tous les fichiers qu'elle contient. C'est là que Codecov intervient. L'action codecov/codecov-action prend le rapport généré et le télécharge à Codecov pour pouvoir le visualiser.
+        path: target/site/jacoco/jacoco.xml

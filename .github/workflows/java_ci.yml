@@ -39,15 +39,11 @@ jobs:
         cd back
         mvn clean install
 
-    # Étape pour publier le rapport Jacoco sur Codecov (un servie en ligne pour visualiser la couverture de code). 
-    - name: Publish Jacoco test report
-      uses: codecov/codecov-action@v2
+    # Ici, nous ajoutons la partie pour le reporting des tests
+    - name: Test Report
+      uses: phoenix-actions/test-reporting@v8
+      if: success() || failure()  # Exécute cette étape même si l'étape précédente a échoué
       with:
-        # Si vous utilisez un repository privé, vous devrez fournir un jeton de Codecov.
-        token: ${{ secrets.CODECOV_TOKEN }}
-        # Si l'upload vers Codecov échoue, cette option fera échouer la CI.
-        fail_ci_if_error: true
-        # Une option pour classer les rapports. J'ai choisi 'unittests' comme identifiant pour montrer qu'il s'ait de tests unitaires, mais j'aurai pu le nommer autrement, ou même ne pas utiliser cet attribut.
-        flags: unittests
-        # Le chemin du rapport Jacoco à publier. Note: Une fois le workflow terminé la machine virtuelle est détruite, y compris tous les fichiers qu'elle contient. C'est là que Codecov intervient. L'action codecov/codecov-action prend le rapport généré et le télécharge à Codecov pour pouvoir le visualiser.
-        path: target/site/jacoco/jacoco.xml
+        name: Maven Tests  # Nom du rapport qui sera créé
+        path: back/target/surefire-reports/TEST-*.xml  # Chemin vers les résultats des tests Maven
+        reporter: java-junit  # Format des résultats des tests

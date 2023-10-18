@@ -6,8 +6,8 @@ on: [push]
 
 # Définition des jobs à exécuter.
 jobs:
-  # Le nom du job. 'build' est un nom courant.
-  test-backend:
+  # Le nom du job. 'build' est un nom courant
+  build:
     # L'environnement d'exécution pour le job.
     runs-on: ubuntu-latest
 

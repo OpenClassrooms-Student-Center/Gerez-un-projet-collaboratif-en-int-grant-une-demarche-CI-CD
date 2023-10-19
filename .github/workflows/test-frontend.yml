@@ -51,4 +51,4 @@ jobs:
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }} # facultatif pour les repos publics
-        file: ./coverage/bobapp/report-lcovonly.txt
+        file: ./front/coverage/bobapp/report-lcovonly.txt

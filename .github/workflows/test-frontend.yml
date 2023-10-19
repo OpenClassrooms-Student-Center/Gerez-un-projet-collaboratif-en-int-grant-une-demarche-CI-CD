@@ -38,14 +38,19 @@ jobs:
 
     # Étape pour installer les dépendances du projet.
     - run: npm ci
-    # Étape pour exécuter les tests
-    - run: npm run test -- --coverageReporters=junit --coverageDirectory=reports
-
-    # Utilisation de phoenix-actions/test-reporting pour afficher les résultats.
-    - name: Test Report
-      uses: phoenix-actions/test-reporting@v8
-      if: success() || failure()  # run this step even if previous step failed
-      with:
-        name: JEST Tests
-        path: front/reports/jest-*.xml
-        reporter: jest-junit
+    # Étape pour exécuter les tests avec la couverture activée
+    # La commande npm run test est utilisée pour exécuter les tests. Les flags supplémentaires sont utilisés pour:
+    # --no-watch : Assure que le test ne reste pas en mode d'écoute pour les changements
+    # --no-progress : Supprime la barre de progression pour un affichage propre dans les logs CI
+    # --browsers=ChromeHeadlessCI : Utilise le navigateur Chrome en mode headless (sans UI)
+    # --code-coverage : Indique à Angular de générer des rapports de couverture
+    - run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI --code-coverage
+  
+    # Étape pour afficher le rapport de couverture
+    # Cette étape utilise l'action GitHub "phoenix-actions/test-reporting" pour afficher le rapport de couverture dans GitHub Checks.
+    - name: Display Coverage Report      # Nom de l'étape
+      uses: phoenix-actions/test-reporting@v8   # L'action GitHub que nous utilisons
+      with:                                  # Paramètres fournis à l'action
+        name: Angular Test Coverage          # Nom du rapport qui sera affiché dans GitHub Checks
+        path: ./coverage/bobapp/report-lcovonly.txt # Emplacement du rapport de couverture généré par Karma
+        reporter: lcov                       # Format du rapport. 'lcov' est un format standard pour la couverture du code.

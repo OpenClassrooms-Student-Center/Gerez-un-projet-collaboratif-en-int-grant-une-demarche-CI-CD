@@ -49,5 +49,6 @@ jobs:
     # Étape pour afficher le rapport de couverture
     - name: Upload coverage reports to Codecov
       uses: codecov/codecov-action@v3
-      env:
-        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} # facultatif pour les repos publics
+        file: ./coverage/bobapp/report-lcovonly.txt

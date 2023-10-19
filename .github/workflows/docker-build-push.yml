@@ -66,13 +66,6 @@ jobs:
           context: back
           file: back/Dockerfile
           push: true
-          tags: |
-            type=ref,event=branch
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=sha
-
-#tags: ${{ secrets.DOCKERHUB_USERNAME }}/oc-projects:bobapp-back-latest
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/oc-projects:bobapp-back-latest
 
 

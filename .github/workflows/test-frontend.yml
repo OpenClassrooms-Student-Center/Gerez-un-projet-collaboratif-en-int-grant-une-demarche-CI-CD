@@ -47,10 +47,7 @@ jobs:
     - run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadless --code-coverage
 
     # Étape pour afficher le rapport de couverture
-    # Cette étape utilise l'action GitHub "phoenix-actions/test-reporting" pour afficher le rapport de couverture dans GitHub Checks.
-    - name: Display Coverage Report      # Nom de l'étape
-      uses: phoenix-actions/test-reporting@v8   # L'action GitHub que nous utilisons
-      with:                                  # Paramètres fournis à l'action
-        name: Angular Test Coverage          # Nom du rapport qui sera affiché dans GitHub Checks
-        path: ./coverage/bobapp/report-lcovonly.txt # Emplacement du rapport de couverture généré par Karma
-        reporter: lcov                       # Format du rapport. 'lcov' est un format standard pour la couverture du code.
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      env:
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}

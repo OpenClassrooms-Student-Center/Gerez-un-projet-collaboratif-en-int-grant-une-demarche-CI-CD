@@ -67,3 +67,5 @@ jobs:
           file: back/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/oc-projects:bobapp-back-latest
+
+

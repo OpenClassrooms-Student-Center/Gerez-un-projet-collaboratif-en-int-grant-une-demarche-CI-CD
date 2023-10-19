@@ -44,7 +44,7 @@ jobs:
     # --no-progress : Supprime la barre de progression pour un affichage propre dans les logs CI
     # --browsers=ChromeHeadlessCI : Utilise le navigateur Chrome en mode headless (sans UI)
     # --code-coverage : Indique à Angular de générer des rapports de couverture
-    - run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadlessCI --code-coverage
+    - run: npm run test -- --no-watch --no-progress --code-coverage
   
     # Étape pour afficher le rapport de couverture
     # Cette étape utilise l'action GitHub "phoenix-actions/test-reporting" pour afficher le rapport de couverture dans GitHub Checks.

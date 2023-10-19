@@ -38,7 +38,12 @@ module.exports = function (config) {
       reporters: [
         { type: "html" },
         { type: "text-summary" },
-        { type: "lcovonly" },
+        {
+          type: "lcovonly",
+          subdir: ".",
+          file: "report-lcovonly.txt", // Ceci est essentiel pour notre intégration avec GitHub Actions.
+          // Il produit un seul fichier lcov qui sera utilisé par `phoenix-actions/test-reporting`.
+        },
       ],
     },
     // Liste des reporters utilisés par Karma pour rendre compte des tests.
@@ -53,7 +58,7 @@ module.exports = function (config) {
     colors: true,
     logLevel: config.LOG_INFO,
     autoWatch: true,
-    browsers: ["ChromeHeadless"],
+    browsers: ["Chrome"],
     singleRun: false,
     restartOnFileChange: true,
   });

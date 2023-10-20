@@ -8,36 +8,6 @@ on:
 
 jobs:
 
-  build-front:
-    name: Docker push Image Front
-    strategy:
-        matrix:
-            os: [ubuntu-latest] # You can add other OS here
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      -
-        name: Checkout
-        uses: actions/checkout@v4
-      -
-        name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      -
-        name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      -
-        name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: front
-          file: front/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/oc-projects:bobapp-front-latest
-
-
   build-back:    
     name: Docker push Image Back
     strategy:
@@ -66,5 +36,32 @@ jobs:
           file: back/Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/oc-projects:bobapp-back-latest
+          
+  build-front:
+    name: Docker push Image Front
+    strategy:
+        matrix:
+            os: [ubuntu-latest] # You can add other OS here
+    runs-on: ${{ matrix.os }}
 
-
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v4
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      -
+        name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: front
+          file: front/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/oc-projects:bobapp-front-latest

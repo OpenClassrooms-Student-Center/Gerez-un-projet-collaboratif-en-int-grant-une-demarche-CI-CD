@@ -25,7 +25,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
 
-    - name: take the compiled code and package id (compile and test alredy executed in this life sycle).
+    - name: Take the compiled code and package it (compile and test alredy executed in this life sycle).
       working-directory: back
       # Batch mode is essential if you need to run Maven in a non-interactive, continuous integration environment. 
       # When running in non-interactive mode, Maven will never stop to accept input from the user
@@ -42,7 +42,6 @@ jobs:
       with:
         name: jacoco-report
         path: back/target/site/jacoco/
-
 
   build-front:
     name: Front build and test

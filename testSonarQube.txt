@@ -1,1 +1,2 @@
-Juste un test depuis mon local pour voir si un push déclanche SonarCube
+Juste un test depuis mon local pour voir si un push déclanche SonarCube.
+Et on recommance pour un test.

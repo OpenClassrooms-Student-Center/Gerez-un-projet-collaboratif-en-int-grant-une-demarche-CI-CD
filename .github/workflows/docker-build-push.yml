@@ -1,4 +1,4 @@
-name: Docker Image Front CI
+name: Docker deployment
 
 on:
   push:
@@ -9,12 +9,12 @@ on:
 jobs:
 
   build-front:
-    runs-on: ${{ matrix.os }}  
+    name: Docker push Image Front
     strategy:
         matrix:
             os: [ubuntu-latest] # You can add other OS here
-            
-    name: Docker Image Front CI
+    runs-on: ${{ matrix.os }}
+
     steps:
       -
         name: Checkout
@@ -39,13 +39,12 @@ jobs:
 
 
   build-back:    
-    runs-on: ${{ matrix.os }}  
+    name: Docker push Image Back
     strategy:
         matrix:
-            os: [ubuntu-latest]
-    
-    name: Docker Image Back CI
-    
+            os: [ubuntu-latest] # You can add other OS here
+    runs-on: ${{ matrix.os }}
+
     steps:
       -
         name: Checkout

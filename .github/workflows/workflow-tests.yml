@@ -9,18 +9,19 @@ on:
 jobs:
 
   build-back:
-    runs-on: ${{ matrix.os }}  
+    name: Back build and test
     strategy:
         matrix:
             os: [ubuntu-latest] # You can add other OS here
+            version: [11]
+    runs-on: ${{ matrix.os }}
 
-    name: Back CI
     steps:     
     - uses: actions/checkout@v3
-    - name: Set up JDK 11
+    - name: Set up JDK ${{ matrix.version }}
       uses: actions/setup-java@v3
       with:
-        java-version: '11'
+        java-version: ${{ matrix.version }}
         distribution: 'temurin'
         cache: maven
 
@@ -44,12 +45,12 @@ jobs:
 
 
   build-front:
-    runs-on: ${{ matrix.os }}  
+    name: Front build and test
     strategy:
         matrix:
             os: [ubuntu-latest] # You can add other OS here
+    runs-on: ${{ matrix.os }}
 
-    name: Front CI
     steps:
     - uses: actions/checkout@v3
     - name: Use Node.js ${{ matrix.node-version }}

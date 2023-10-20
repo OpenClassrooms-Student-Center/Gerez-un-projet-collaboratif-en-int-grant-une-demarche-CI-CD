@@ -1,0 +1,56 @@
+name: Test Both Frontend and Backend
+
+on: [push]
+
+jobs:
+  test-frontend:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: front/package-lock.json
+    - run: npm ci
+    - run: npm run test -- --no-watch --no-progress --browsers=ChromeHeadless --code-coverage
+    - name: Upload coverage reports to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }} 
+        file: ./front/coverage/bobapp/report-lcovonly.txt
+
+  test-backend:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+    - name: Set up JDK 11
+      uses: actions/setup-java@v3
+      with:
+        distribution: "adopt"
+        java-version: 11
+    - name: Cache Maven packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.m2
+        key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+        restore-keys: ${{ runner.os }}-m2
+    - name: Build with Maven and Run Tests
+      run: |
+        cd back
+        mvn clean install
+    - name: Test Report
+      uses: phoenix-actions/test-reporting@v8
+      if: success() || failure()
+      with:
+        name: Maven Tests
+        path: back/target/surefire-reports/TEST-*.xml
+        reporter: java-junit

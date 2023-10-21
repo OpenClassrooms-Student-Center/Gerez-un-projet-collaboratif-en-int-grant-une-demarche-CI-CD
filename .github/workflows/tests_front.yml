@@ -1,0 +1,32 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Test Front with Coverage
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  frontend :
+    name : Front-End
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js 16
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+        cache: 'npm'
+    - name: Installing packages
+      run: npm ci
+
+    - name: Tests with coverage
+      run: npm run test:prod
+
+    - name: Upload coverage artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Karma Tests Reports
+        path: front/coverage

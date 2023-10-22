@@ -10,7 +10,7 @@ on:
     branches: [ "main" ]
 
 jobs:
-  build:
+  Frontend:
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -23,6 +23,7 @@ jobs:
       with:
         node-version: 16
         cache: 'npm'
+        cache-dependency-path: '**/package-lock.json'
     - name : Install dependencies Angular
       run: npm install
       

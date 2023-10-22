@@ -32,3 +32,9 @@ jobs:
     
     - name : Test run
       run: npm run test:prod
+
+    - name: Upload coverage 
+      uses: actions/upload-artifact@v3
+      with:
+        name: Tests Reports with Karma
+        path: front/coverage

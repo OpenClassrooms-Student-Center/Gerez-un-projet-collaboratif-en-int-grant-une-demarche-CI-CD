@@ -34,3 +34,9 @@ jobs:
 
     - name: Tests run
       run: mvn -B clean test
+
+    - name: Upload coverage artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: Jacoco Tests Reports
+        path: back/target/site/jacoco

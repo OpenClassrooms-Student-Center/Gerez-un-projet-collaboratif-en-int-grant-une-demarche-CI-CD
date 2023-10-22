@@ -62,6 +62,6 @@
 				</plugin>
 			</plugins>
 		</build>
-	<profiles>
 	<profile>
+	<profiles>
 </project>

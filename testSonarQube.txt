@@ -1,3 +1,4 @@
 Juste un test depuis mon local pour voir si un push déclanche SonarCube.
 Et on recommance pour un test.
 ça marche enfin, juste un test avec le token ngrok obselète
+Testons un Pull Request pour voir l'analyse SonarQube dans les checks de la PR

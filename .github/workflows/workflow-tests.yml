@@ -13,15 +13,15 @@ jobs:
     strategy:
         matrix:
             os: [ubuntu-latest] # You can add other OS here
-            version: [11]
+            java-version: [11]
     runs-on: ${{ matrix.os }}
 
     steps:     
     - uses: actions/checkout@v3
-    - name: Set up JDK ${{ matrix.version }}
+    - name: Set up JDK ${{ matrix.java-version }}
       uses: actions/setup-java@v3
       with:
-        java-version: ${{ matrix.version }}
+        java-version: ${{ matrix.java-version }}
         distribution: 'temurin'
         cache: maven
 
@@ -48,6 +48,7 @@ jobs:
     strategy:
         matrix:
             os: [ubuntu-latest] # You can add other OS here
+            node-version: [18]
     runs-on: ${{ matrix.os }}
 
     steps:
@@ -56,7 +57,6 @@ jobs:
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
-        path: ~/.npm
 
     - name: NPM clean install
       working-directory: front
@@ -71,11 +71,13 @@ jobs:
       run: |
         npm install -g @angular/cli
         ng test --browsers ChromeHeadless --watch=false
+    
     - name: Coverage tests
       working-directory: front
       run: |
         npm install -g @angular/cli
         ng test --code-coverage --watch=false --browsers ChromeHeadless
+    
     - name: Archive code coverage results
       uses: actions/upload-artifact@v3
       with:

@@ -60,9 +60,9 @@ Go on it and modify "" for you're own space/account
 OPEN Docker desktop and search for your images 
 Then run it.
 
-
-
-
+-
+-
+-
 
 ## WIP CI/CD Readme
 

@@ -49,7 +49,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         working-directory: back
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectName="NO_bob_app" -Dsonar.projectKey=nathanollichon_no_bob-app
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectName="NO_bob_app_back" -Dsonar.projectKey=nathanollichon_no_bob-app-back
 
   build-front:
     name: SonarQube front
@@ -83,6 +83,9 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@master
         with:
           projectBaseDir: front
+          args: >
+            -Dsonar.projectName="NO_bob_app_front"
+            -Dsonar.projectKey=nathanollichon_no_bob-app-front
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

@@ -60,6 +60,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - uses: actions/checkout@v3
       - name: Node.js config V ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
@@ -72,11 +73,6 @@ jobs:
       - name: NPM clean install
         working-directory: front
         run: npm ci
-      
-      - name: Install
-        working-directory: front
-        run: |
-          npm install -g @angular/cli
       
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

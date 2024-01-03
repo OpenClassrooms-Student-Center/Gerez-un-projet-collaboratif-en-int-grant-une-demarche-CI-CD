@@ -78,10 +78,11 @@ jobs:
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         with:
-          projectBaseDir: front
+          projectBaseDir: front/
           args: >
             -Dsonar.projectName="NO_bob_app_front"
             -Dsonar.projectKey=nathaollichonoc_no-bob-app-front
+            -Dsonar.organization=nathaollichonoc
             -Dsonar.qualitygate.wait=true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -49,7 +49,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         working-directory: back
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.organization=nathanollichon -Dsonar.projectKey=NO_projet-collaboratif-CI-CD -Dsonar.qualitygate.wait=true
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectName="NO_bob_app_front" -Dsonar.projectKey=nathaollichonoc_no-bob-app-front -Dsonar.qualitygate.wait=true
 
 
   build-front:
@@ -80,10 +80,9 @@ jobs:
         with:
           projectBaseDir: front
           args: >
-            -Dsonar.projectName="Gerez-un-projet-collaboratif-en-int-grant-une-demarche-CI-CD"
-            -Dsonar.projectKey=NO_projet-collaboratif-CI-CD
+            -Dsonar.projectName="NO_bob_app_back"
+            -Dsonar.projectKey=nathaollichonoc_no-bob-app-back
             -Dsonar.qualitygate.wait=true
-            -Dsonar.organization=nathanollichon
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

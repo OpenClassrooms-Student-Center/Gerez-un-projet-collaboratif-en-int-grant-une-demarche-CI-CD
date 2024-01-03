@@ -78,7 +78,7 @@ jobs:
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         with:
-          projectBaseDir: front/
+          projectBaseDir: front/src
           args: >
             -Dsonar.projectName="NO_bob_app_front"
             -Dsonar.projectKey=nathaollichonoc_no-bob-app-front

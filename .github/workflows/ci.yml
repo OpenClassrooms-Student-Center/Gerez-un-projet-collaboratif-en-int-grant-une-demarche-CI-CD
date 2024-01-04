@@ -1,0 +1,79 @@
+name: CI pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  
+jobs:
+
+  test_job_frontend:
+    
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: front
+
+    steps:
+    - name: Checkout frontend repository
+      uses: actions/checkout@v3
+
+    - name: Use Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+
+    - name: Install frontend dependencies
+      run: |
+        rm -f package-lock.json
+        npm install
+        npm ci
+      
+    - name: Run frontend tests
+      run: npm run test -- --no-watch --browsers=ChromeHeadless --reporters=spec,junit --code-coverage 
+
+    - name: Upload frontend coverage Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: frontend-coverage-report
+        path: front/coverage
+    
+  test_job_backend:
+    
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout backend repository
+      uses: actions/checkout@v3
+
+    - name: Set up JDK
+      uses: actions/setup-java@v3
+      with:
+        distribution: 'temurin'
+        java-version: '11'
+        cache: 'maven'
+
+    - name: Run backend Tests
+      run: mvn test -batch-mode
+      working-directory: back
+
+    - name: Run JaCoCo Report
+      run: mvn jacoco:report
+      working-directory: back
+
+    - name: Upload JaCoCo coverage Report
+      uses: actions/upload-artifact@v3
+      with:
+        name: backend-coverage-report
+        path: back/target/site/jacoco/
+
+
+ 
+      
+
+
+

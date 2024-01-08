@@ -148,12 +148,12 @@ jobs:
 
       - name: Run front tests and generate coverage
         working-directory: front
-        run: npm test --coverage --browsers ChromeHeadless --watch=false
+        run: npm test --  --watch=false --browsers ChromeHeadless
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         with:
-          projectBaseDir: front/src
+          projectBaseDir: front
           args: >
             -Dsonar.projectName="NO_bob_app_front"
             -Dsonar.projectKey=nathaollichonoc_no-bob-app-front

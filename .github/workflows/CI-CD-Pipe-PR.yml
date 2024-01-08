@@ -46,6 +46,7 @@ jobs:
 
   analyse-back:
     name: SonarQube analyse back-end
+    needs: [build-back]
     strategy:
         matrix:
             os: [ubuntu-latest]
@@ -130,6 +131,7 @@ jobs:
 
   analyse-front:
     name: SonarQube front
+    needs: [build-front]
     strategy:
         matrix:
             os: [ubuntu-latest]

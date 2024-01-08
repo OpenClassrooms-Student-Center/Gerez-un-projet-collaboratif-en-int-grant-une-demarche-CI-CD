@@ -132,8 +132,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Node.js config V ${{ matrix.node-version }}
+      - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
@@ -146,9 +145,11 @@ jobs:
         working-directory: front
         run: npm ci
 
-      - name: Run front tests and generate coverage
+      - name: Coverage tests
         working-directory: front
-        run: npm test --  --watch=false --browsers ChromeHeadless
+        run: |
+          npm install -g @angular/cli
+          ng test --code-coverage --watch=false --browsers ChromeHeadless
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
@@ -159,7 +160,6 @@ jobs:
             -Dsonar.projectKey=nathaollichonoc_no-bob-app-front
             -Dsonar.organization=nathaollichonoc
             -Dsonar.qualitygate.wait=true
-            -Dsonar.sonar.javascript.lcov.reportPaths=front/coverage/bobapp/
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

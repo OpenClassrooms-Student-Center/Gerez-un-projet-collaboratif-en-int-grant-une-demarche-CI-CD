@@ -6,7 +6,6 @@ on:
 
 jobs:
 
-
   build-back:    
     name: Docker push Image Back-end
     strategy:

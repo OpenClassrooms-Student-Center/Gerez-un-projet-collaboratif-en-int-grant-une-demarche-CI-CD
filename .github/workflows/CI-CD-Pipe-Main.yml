@@ -152,7 +152,14 @@ jobs:
           ng test --code-coverage --watch=false --browsers ChromeHeadless
 
       - name: PWD1
+        working-directory: front
         run: |
+          pwd
+          ls
+          cd src
+          pwd
+          ls
+          cd coverage
           pwd
           ls
 

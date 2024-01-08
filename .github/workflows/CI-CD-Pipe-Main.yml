@@ -113,6 +113,7 @@ jobs:
     - name: Coverage tests
       working-directory: front
       run: |
+        npm install -g @angular/cli
         ng test --code-coverage --browsers ChromeHeadless --watch=false
     
     - name: Archive code coverage results
@@ -136,6 +137,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
       - name: NPM clean install
         working-directory: front
         run: npm ci
@@ -143,6 +148,7 @@ jobs:
       - name: Coverage tests
         working-directory: front
         run: |
+          npm install -g @angular/cli
           ng test --code-coverage --watch=false --browsers ChromeHeadless
 
       - name: SonarCloud Scan

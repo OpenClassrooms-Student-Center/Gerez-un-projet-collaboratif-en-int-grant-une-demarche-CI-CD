@@ -151,6 +151,11 @@ jobs:
           npm install -g @angular/cli
           ng test --code-coverage --watch=false --browsers ChromeHeadless
 
+      - name: PWD1
+        run: |
+          pwd
+          ls
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         with:

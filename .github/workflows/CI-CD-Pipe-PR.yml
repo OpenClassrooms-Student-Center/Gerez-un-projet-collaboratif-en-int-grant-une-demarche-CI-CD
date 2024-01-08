@@ -118,7 +118,7 @@ jobs:
       working-directory: front
       run: |
         npm install -g @angular/cli
-        ng test --code-coverage --watch=false --browsers ChromeHeadless
+        ng test --code-coverage --browsers ChromeHeadless --watch=false
     
     - name: Archive code coverage results
       uses: actions/upload-artifact@v3

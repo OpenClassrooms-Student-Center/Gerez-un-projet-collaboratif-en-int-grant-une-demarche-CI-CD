@@ -7,7 +7,7 @@ on:
     types: [opened, synchronize, reopened]
 
 permissions:
-  pull-requests: read # allows SonarQube to decorate PRs with analysis results
+  pull-requests: read
   
 jobs:
 
@@ -15,7 +15,7 @@ jobs:
     name: Back build and test
     strategy:
         matrix:
-            os: [ubuntu-latest] # You can add other OS here
+            os: [ubuntu-latest]
             java-version: [11]
     runs-on: ${{ matrix.os }}
 
@@ -30,8 +30,6 @@ jobs:
 
     - name: Take the compiled code and package it (compile and test alredy executed in this life sycle).
       working-directory: back
-      # Batch mode is essential if you need to run Maven in a non-interactive, continuous integration environment. 
-      # When running in non-interactive mode, Maven will never stop to accept input from the user
       run: mvn -B package --file pom.xml
 
     - name: Generate JaCoCo Badge
@@ -63,7 +61,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java-version }}
-          distribution: 'zulu' #TODO Maybe need Java17
+          distribution: 'zulu'
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
@@ -91,7 +89,7 @@ jobs:
     name: Front build and test
     strategy:
         matrix:
-            os: [ubuntu-latest] # You can add other OS here
+            os: [ubuntu-latest]
             node-version: [18]
     runs-on: ${{ matrix.os }}
 
@@ -155,7 +153,7 @@ jobs:
 
       - name: Run front tests and generate coverage
         working-directory: front
-        run: npm run test:prod
+        run: npm run test
       
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

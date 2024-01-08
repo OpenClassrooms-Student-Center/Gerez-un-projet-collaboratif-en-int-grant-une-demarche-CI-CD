@@ -163,7 +163,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-    build-back:    
+  docker-back:    
       name: Docker push Image Back-end
       needs: [analyse-back]
       strategy:
@@ -193,7 +193,7 @@ jobs:
             push: true
             tags: ${{ secrets.DOCKERHUB_USERNAME }}/oc_bob_app:bobapp-back-latest
 
-    build-front:
+  docker-front:
       name: Docker push Image Front
       needs: [analyse-front]
       strategy:

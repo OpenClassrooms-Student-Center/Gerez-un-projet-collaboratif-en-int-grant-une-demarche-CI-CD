@@ -1,1 +1,176 @@
+name: Tests and analyse Back-end and Front-end
 
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+
+  build-back:
+    name: Back build and test
+    strategy:
+        matrix:
+            os: [ubuntu-latest] # You can add other OS here
+            java-version: [11]
+    runs-on: ${{ matrix.os }}
+
+    steps:     
+    - uses: actions/checkout@v3
+    - name: Set up JDK ${{ matrix.java-version }}
+      uses: actions/setup-java@v3
+      with:
+        java-version: ${{ matrix.java-version }}
+        distribution: 'temurin'
+        cache: maven
+
+    - name: Take the compiled code and package it (compile and test alredy executed in this life sycle).
+      working-directory: back
+      # Batch mode is essential if you need to run Maven in a non-interactive, continuous integration environment. 
+      # When running in non-interactive mode, Maven will never stop to accept input from the user
+      run: mvn -B package --file pom.xml
+
+    - name: Generate JaCoCo Badge
+      uses: cicirello/jacoco-badge-generator@v2
+      with:
+        jacoco-csv-file: back/target/site/jacoco/jacoco.csv
+        generate-branches-badge: true
+
+    - name: Upload JaCoCo coverage report
+      uses: actions/upload-artifact@v3
+      with:
+        name: jacoco-report
+        path: back/target/site/jacoco/
+
+  build-front:
+    name: Front build and test
+    strategy:
+        matrix:
+            os: [ubuntu-latest] # You can add other OS here
+            node-version: [18]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: NPM clean install
+      working-directory: front
+      run: npm ci
+
+    - name: build the project
+      working-directory: front
+      run: npm run build
+
+    - name: Unit tests
+      working-directory: front
+      run: |
+        npm install -g @angular/cli
+        ng test --browsers ChromeHeadless --watch=false
+    
+    - name: Coverage tests
+      working-directory: front
+      run: |
+        npm install -g @angular/cli
+        ng test --code-coverage --watch=false --browsers ChromeHeadless
+    
+    - name: Archive code coverage results
+      uses: actions/upload-artifact@v3
+      with:
+        name: code-coverage-report
+        path: front/coverage/bobapp/
+
+
+name: SonarQube analysis
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  pull-requests: read # allows SonarQube to decorate PRs with analysis results
+
+jobs:
+
+  analyse-back:
+    name: SonarQube analyse back-end
+    strategy:
+        matrix:
+            os: [ubuntu-latest]
+            java-version: [17]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+        # with:
+          # fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+          
+      - name: Set up JDK ${{ matrix.java-version }}
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ matrix.java-version }}
+          distribution: 'zulu' #TODO Maybe need Java17
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+
+      - name: Maven build and Sonar analyze back-end
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        working-directory: back
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectName="NO_bob_app_back" -Dsonar.projectKey=nathaollichonoc_no-bob-app-back -Dsonar.qualitygate.wait=true
+
+
+  build-front:
+    name: SonarQube front
+    strategy:
+        matrix:
+            os: [ubuntu-latest]
+            node-version: [18]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Node.js config V ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      
+      - name: NPM clean install
+        working-directory: front
+        run: npm ci
+      
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: front/src
+          args: >
+            -Dsonar.projectName="NO_bob_app_front"
+            -Dsonar.projectKey=nathaollichonoc_no-bob-app-front
+            -Dsonar.organization=nathaollichonoc
+            -Dsonar.qualitygate.wait=true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

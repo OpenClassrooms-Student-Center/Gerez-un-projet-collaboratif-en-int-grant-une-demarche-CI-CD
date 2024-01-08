@@ -152,6 +152,10 @@ jobs:
       - name: NPM clean install
         working-directory: front
         run: npm ci
+
+      - name: Run front tests and generate coverage
+        working-directory: front
+        run: npm run test:prod
       
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

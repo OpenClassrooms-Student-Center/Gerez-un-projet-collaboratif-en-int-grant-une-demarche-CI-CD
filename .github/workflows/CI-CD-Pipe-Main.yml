@@ -1,4 +1,4 @@
-name: Tests, Analyse, Push, Back-end and Front-end
+name: Tests, Analyse, Push, Back & Front
 
 on:
   push:
@@ -151,15 +151,6 @@ jobs:
           npm install -g @angular/cli
           ng test --code-coverage --watch=false --browsers ChromeHeadless
 
-      - name: PWD1
-        working-directory: front
-        run: |
-          pwd
-          ls
-          cd coverage
-          pwd
-          ls
-
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         with:
@@ -176,7 +167,7 @@ jobs:
 
   docker-back:    
       name: Docker push Image Back-end
-      needs: [analyse-back]
+      needs: [analyse-back, analyse-front]
       strategy:
           matrix:
             os: [ubuntu-latest]
@@ -206,7 +197,7 @@ jobs:
 
   docker-front:
       name: Docker push Image Front
-      needs: [analyse-front]
+      needs: [analyse-front, analyse-back]
       strategy:
         matrix:
             os: [ubuntu-latest]

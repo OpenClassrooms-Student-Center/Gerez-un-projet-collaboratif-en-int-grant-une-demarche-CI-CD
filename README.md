@@ -114,3 +114,10 @@ Go on it and modify "" for you're own space/account
 
 OPEN Docker desktop and search for your images 
 Then run it.
+
+#### Configuration
+
+SonarCloud 2 spaces creation et config + keys + sonar quality gate 
+modification on github secrets + change names of project cloud in workflow
+
+Same for DockerHub, for push in your spaces, create name and change project name. 

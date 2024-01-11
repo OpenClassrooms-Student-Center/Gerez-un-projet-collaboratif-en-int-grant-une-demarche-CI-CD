@@ -5,13 +5,14 @@ on:
     branches:
       - main
   pull_request:
+    types: [opened, synchronize, reopened]
     branches:
       - main
   
 jobs:
 
   test_job_frontend:
-    
+    name: Frontend Tests with Coverage Report
     runs-on: ubuntu-latest
 
     defaults:
@@ -35,7 +36,8 @@ jobs:
       
     - name: Run frontend tests
       run: npm run test -- --no-watch --browsers=ChromeHeadless --reporters=spec,junit --code-coverage 
-
+    
+      # https://github.com/marketplace/actions/test-reporting
     - name: Upload frontend coverage Report
       uses: actions/upload-artifact@v3
       with:
@@ -43,7 +45,7 @@ jobs:
         path: front/coverage
     
   test_job_backend:
-    
+    name: Backend Tests with JaCoCo Report
     runs-on: ubuntu-latest
 
     steps:
@@ -56,7 +58,7 @@ jobs:
         distribution: 'temurin'
         java-version: '11'
         cache: 'maven'
-
+      # https://www.linkedin.com/pulse/run-tests-using-github-actions-springboot-project-gabriela-badila/
     - name: Run backend Tests
       run: mvn test -batch-mode
       working-directory: back
@@ -70,6 +72,37 @@ jobs:
       with:
         name: backend-coverage-report
         path: back/target/site/jacoco/
+
+  sonar-coul_job:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'zulu' # Alternative distribution options are available.
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - name: Cache Maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-m2
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectKey=alexia-pratensi_Gerez-un-projet-collaboratif-en-int-grant-une-demarche-CI-CD
+        working-directory: back
 
 
  

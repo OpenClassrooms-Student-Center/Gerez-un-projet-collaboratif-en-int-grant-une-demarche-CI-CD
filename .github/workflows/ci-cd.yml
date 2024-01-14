@@ -194,4 +194,3 @@ jobs:
           file: ./${{ matrix.component }}/Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_REPOSITORY }}:${{ matrix.component }}
-

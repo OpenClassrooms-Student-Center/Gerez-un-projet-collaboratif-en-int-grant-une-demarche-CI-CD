@@ -27,19 +27,16 @@ jobs:
           node-version: '18'
 
       - name: Install frontend dependencies
-        run: |
-          rm -f package-lock.json
-          npm install
-          npm ci
+        run: npm ci
         
       - name: Run frontend tests
-        run: npm run test -- --no-watch --browsers=ChromeHeadless --reporters=spec,junit --code-coverage 
+        run: npm run test -- --no-watch --browsers=ChromeHeadless --code-coverage 
       
       - name: Upload frontend coverage Report
         uses: actions/upload-artifact@v3
         with:
           name: frontend-coverage-report
-          path: front/coverage/bobapp
+          path: front/coverage/bobapp/lcov.info
     
   test_job_backend:
     name: Backend Tests with JaCoCo Report
@@ -128,10 +125,7 @@ jobs:
           node-version: '18'
 
       - name: install dependencies
-        run: |
-          rm -f package-lock.json
-          npm install
-          npm ci
+        run: npm ci
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v3
@@ -141,7 +135,7 @@ jobs:
           restore-keys: ${{ runner.os }}-sonar
       
       - name: run frontend tests
-        run: npm run test -- --no-watch --browsers=ChromeHeadless --reporters=spec,junit --code-coverage
+        run: npm run test -- --no-watch --browsers=ChromeHeadless --code-coverage
         
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master

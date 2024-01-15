@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: frontend-coverage-report
-          path: front/coverage/bobapp/lcov.info
+          path: front/coverage/bobapp/
     
   test_job_backend:
     name: Backend Tests with JaCoCo Report
@@ -108,7 +108,6 @@ jobs:
 
   sonarcould_frontend_job:
     name: SonarCloud Scan frontend side
-    needs: test_job_frontend
     runs-on: ubuntu-latest
 
     defaults:

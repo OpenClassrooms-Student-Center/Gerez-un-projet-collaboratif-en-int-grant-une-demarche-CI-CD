@@ -27,7 +27,9 @@ jobs:
           node-version: '18'
 
       - name: Install frontend dependencies
-        run: npm ci
+        run: |
+            npm install
+            npm ci
         
       - name: Run frontend tests
         run: npm run test -- --no-watch --browsers=ChromeHeadless --code-coverage 
@@ -125,7 +127,9 @@ jobs:
           node-version: '18'
 
       - name: install dependencies
-        run: npm ci
+        run: |
+            npm install
+            npm ci
 
       - name: Cache SonarCloud packages
         uses: actions/cache@v3

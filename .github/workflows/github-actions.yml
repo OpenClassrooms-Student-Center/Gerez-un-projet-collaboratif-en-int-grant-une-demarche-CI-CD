@@ -2,7 +2,7 @@ name: GitHub Actions BOB App
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
   push:
-    branches: [ "develop" ]
+    branches: [ "Develop" ]
   pull_request:
     branches: [ "main" ]
 jobs:

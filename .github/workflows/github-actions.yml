@@ -1,7 +1,10 @@
 name: GitHub Actions BOB App
 run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
 on:
-  workflow_dispatch
+  push:
+    branches: [ "Develop" ]
+  pull_request:
+    branches: [ "main" ]
 jobs:
   build:
     runs-on: ubuntu-latest

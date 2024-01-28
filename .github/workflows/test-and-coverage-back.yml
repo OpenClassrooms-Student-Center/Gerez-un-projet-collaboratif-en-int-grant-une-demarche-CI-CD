@@ -39,5 +39,5 @@ jobs:
           git config --global user.email "cedh@posteo.net"
           git config --global user.name "cedh44"
           git add .
-          git commit -m "Add jacoco coverage report"
+          git commit -m "Add jacoco code coverage report"
           git push

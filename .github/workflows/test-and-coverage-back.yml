@@ -1,5 +1,4 @@
-name: GitHub Actions BOB App
-run-name: Tests Back and Code Coverage
+name: Tests Back and Code Coverage
 on:
   push:
     branches: [ "Develop" ]

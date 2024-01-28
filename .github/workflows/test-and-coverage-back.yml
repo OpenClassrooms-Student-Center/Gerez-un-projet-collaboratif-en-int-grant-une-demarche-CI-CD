@@ -40,4 +40,4 @@ jobs:
           git config --global user.name "cedh44"
           git add .
           git commit -m "Add jacoco code coverage report"
-          git push
+          git push origin

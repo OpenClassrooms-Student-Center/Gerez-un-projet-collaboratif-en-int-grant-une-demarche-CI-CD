@@ -1,5 +1,5 @@
 name: GitHub Actions BOB App
-run-name: ${{ github.actor }} is testing out GitHub Actions 🚀
+run-name: Tests Back and Code Coverage
 on:
   push:
     branches: [ "Develop" ]
@@ -18,7 +18,7 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        run: mvn test --file back/pom.xml
+        run: mvn clean test --file back/pom.xml
       - run: echo "🍏Mvn Test's status is ${{ job.status }}."
       - name: Add coverage
         id: jacoco

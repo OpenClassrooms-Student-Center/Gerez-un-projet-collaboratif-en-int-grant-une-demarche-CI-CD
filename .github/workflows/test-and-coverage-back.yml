@@ -1,4 +1,4 @@
-name: Tests Back and Code Coverage
+name: Tests and Code Coverage Back
 on:
   push:
     branches: [ "Develop" ]
@@ -34,3 +34,10 @@ jobs:
           debug-mode: false
       - run: echo "Total coverage ${{ steps.jacoco.outputs.coverage-overall }}"
       - run: echo "Changed Files coverage ${{ steps.jacoco.outputs.coverage-changed-files }}"
+      - name: Commit Code Coverage Report
+        run: |
+          git config --global user.email "cedh@posteo.net"
+          git config --global user.name "cedh44"
+          git add .
+          git commit -m "Add jacoco coverage report"
+          git push

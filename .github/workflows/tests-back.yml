@@ -1,4 +1,4 @@
-name: Run tests on the back-end
+name: Run tests on Back-end
 
 on:
   push:
@@ -9,8 +9,10 @@ on:
       - 'main'
 
 jobs:
-  tests-on-back:
+  tests-back:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Print Hello 
-        run: echo "Hello"
+      - name: Checkout
+        run: echo "A faire"
+        # run: actions/checkout@v3

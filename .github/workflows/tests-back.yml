@@ -11,8 +11,15 @@ on:
 jobs:
   tests-back:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: ./back
     steps:
       - name: Checkout
-        run: echo "A faire"
-        # run: actions/checkout@v3
+        uses: actions/checkout@v4
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with: 
+          java-version: 11
+      - name: Build with Maven
+        run: mvn clean install

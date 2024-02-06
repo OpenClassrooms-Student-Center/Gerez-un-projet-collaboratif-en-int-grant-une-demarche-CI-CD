@@ -39,3 +39,6 @@ build/
 .mvn
 
 .angular
+
+# MacOS
+**/.DS_Store

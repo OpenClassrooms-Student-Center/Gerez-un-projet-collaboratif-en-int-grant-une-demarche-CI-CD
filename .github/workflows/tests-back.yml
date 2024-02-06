@@ -1,0 +1,16 @@
+name: Run tests on the back-end
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  tests-on-back:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Hello 
+        run: echo "Hello"

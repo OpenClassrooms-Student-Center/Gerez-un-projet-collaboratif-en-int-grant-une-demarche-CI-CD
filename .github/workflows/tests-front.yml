@@ -20,6 +20,8 @@ jobs:
         with: 
           node-version: 20.9.0
       - name: Install Dependencies
+        working-directory: ./front
         run: npm install
       - name: Run tests
+        working-directory: ./front
         run: npm test

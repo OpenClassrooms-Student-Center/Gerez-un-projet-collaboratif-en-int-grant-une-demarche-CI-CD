@@ -24,4 +24,4 @@ jobs:
       - name: Install Dependencies
         run: npm ci
       - name: Run tests
-        run: npm test:prod
+        run: npm run test:prod

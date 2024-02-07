@@ -12,9 +12,9 @@ on:
 jobs:
   sonar-back:
     runs-on: ubuntu-latest
-    # defaults:
-    #   run:
-    #     working-directory: ./back
+    defaults:
+      run:
+        working-directory: ./back
     steps:
       - uses: actions/checkout@v3
         with:
@@ -26,8 +26,7 @@ jobs:
           java-version: 17
           distribution: 'zulu'
     
-      - name: Build and analyze
-        working-directory: ./back
+      - name: Build and analyze    
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACK }}

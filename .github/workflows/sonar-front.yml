@@ -12,9 +12,6 @@ on:
 jobs:
   sonar-front:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./front
     steps:     
       - uses: actions/checkout@v3
         with:
@@ -30,3 +27,4 @@ jobs:
             -Dsonar.projectKey=codebygaetan_BobApp_front
             -Dsonar.projectName=BobApp_front
             -Dsonar.organization=codebygaetan
+            -Dsonar.projectBaseDir=front/

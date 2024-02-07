@@ -12,9 +12,9 @@ on:
 jobs:
   sonar-front:
     runs-on: ubuntu-latest
-    # defaults:
-    #   run:
-    #     working-directory: ./front
+    defaults:
+      run:
+        working-directory: ./front
     steps:     
       - uses: actions/checkout@v3
         with:

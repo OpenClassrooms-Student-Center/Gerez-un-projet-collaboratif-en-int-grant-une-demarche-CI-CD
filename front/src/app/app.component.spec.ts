@@ -18,8 +18,8 @@ describe('AppComponent', () => {
   //   expect(app).toBeTruthy();
   // });
 
-  // it('should not pass', () => {
-  //   expect(false).toBeFalsy();
-  // })
+  it('should not pass', () => {
+    expect(false).toBeFalsy();
+  })
 
 });

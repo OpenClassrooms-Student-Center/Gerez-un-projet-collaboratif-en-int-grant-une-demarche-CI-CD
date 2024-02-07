@@ -24,7 +24,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
         with:
           args:
+            -Dsonar.organization=codebygaetan
             -Dsonar.projectKey=codebygaetan_BobApp_front
             -Dsonar.projectName=BobApp_front
-            -Dsonar.organization=codebygaetan
             -Dsonar.projectBaseDir=front/

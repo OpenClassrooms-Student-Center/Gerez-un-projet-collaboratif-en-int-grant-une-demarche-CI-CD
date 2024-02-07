@@ -28,5 +28,5 @@ jobs:
         with:
           args:
             -Dsonar.projectKey=codebygaetan_BobApp_front
+            -Dsonar.projectName=BobApp_front
             -Dsonar.organization=codebygaetan
-            -Dsonar.projectBaseDir=front/

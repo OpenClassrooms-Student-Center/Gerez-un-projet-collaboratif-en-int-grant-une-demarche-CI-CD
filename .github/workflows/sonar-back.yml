@@ -31,3 +31,5 @@ jobs:
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar 
           -Dsonar.projectKey=codebygaetan_BobApp_back
           -Dsonar.projectName=BobApp_back
+          -Dsonar.organization=codebygaetan
+          -Dsonar.host.url=https://sonarcloud.io

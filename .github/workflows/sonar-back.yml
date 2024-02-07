@@ -12,9 +12,9 @@ on:
 jobs:
   sonar-back:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./back
+    # defaults:
+    #   run:
+    #     working-directory: ./back
     steps:
       # - name: Checkout
       #   uses: actions/checkout@v4

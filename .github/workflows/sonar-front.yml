@@ -1,0 +1,26 @@
+name: Run SonarCloud on Front-end
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+    branches:
+      - 'main'
+
+      
+jobs:
+  sonar-front:
+    runs-on: ubuntu-latest
+    # defaults:
+    #   run:
+    #     working-directory: ./back
+    steps:     
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}

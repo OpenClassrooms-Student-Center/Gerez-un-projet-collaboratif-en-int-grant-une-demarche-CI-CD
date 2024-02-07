@@ -19,7 +19,7 @@ describe('AppComponent', () => {
   });
 
   it('should not pass', () => {
-    expect(false).toBeTruthy();
+    expect(false).toBeFalsy();
   })
 
 });

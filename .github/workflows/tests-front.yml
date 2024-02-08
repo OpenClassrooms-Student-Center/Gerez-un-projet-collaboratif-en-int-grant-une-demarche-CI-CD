@@ -1,9 +1,6 @@
 name: Run tests on Front-end
 
 on:
-  # push:
-  #   branches:
-  #     - 'main'
   pull_request:
     branches:
       - 'main'

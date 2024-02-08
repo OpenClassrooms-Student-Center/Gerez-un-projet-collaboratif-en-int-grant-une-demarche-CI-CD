@@ -4,7 +4,7 @@ Clone project:
 
 > git clone XXXXX
 
-## Front-end 
+## Front-end
 
 Go inside folder the front folder:
 
@@ -17,16 +17,6 @@ Install dependencies:
 Launch Front-end:
 
 > npm run start;
-
-### Docker
-
-Build the container:
-
-> docker build -t bobapp-front .  
-
-Start the container:
-
-> docker run -p 8080:8080 --name bobapp-front -d bobapp-front
 
 ## Back-end
 
@@ -46,12 +36,37 @@ Launch the tests:
 
 > mvn clean install
 
-### Docker
 
-Build the container:
+## Docker Deployment
 
-> docker build -t bobapp-back .  
+Create a network for the app :
+
+> docker network create bobapp_ntwk
+
+### Back-end
+
+Go inside folder the back folder:
+
+> cd back
+
+Build the Back-end container:
+
+> docker build -t bobapp-back .
 
 Start the container:
 
-> docker run -p 8080:8080 --name bobapp-back -d bobapp-back 
+> docker run --network bobapp_ntwk -p 8080:8080 --name bobapp-back -d bobapp-back
+
+### Front-end
+
+Go inside folder the front folder:
+
+> cd front
+
+Build the container:
+
+> docker build -t bobapp-front .
+
+Start the container:
+
+> docker run --network bobapp_ntwk -p 4200:80 --name bobapp-front -d bobapp-front

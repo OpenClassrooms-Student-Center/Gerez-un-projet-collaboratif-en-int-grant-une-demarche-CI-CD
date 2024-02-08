@@ -1,4 +1,4 @@
-name: Deployment of Back-end on Docker Hub
+name: Deployment of Front-end on Docker Hub
 
 on:
   push:
@@ -24,6 +24,6 @@ jobs:
           - name: Build and push
             uses: docker/build-push-action@v5
             with:
-                context: ./back/
+                context: ./front/
                 push: true
-                tags: ${{ secrets.DOCKERHUB_USERNAME }}/bobapp-back:latest
+                tags: ${{ secrets.DOCKERHUB_USERNAME }}/bobapp-front:latest

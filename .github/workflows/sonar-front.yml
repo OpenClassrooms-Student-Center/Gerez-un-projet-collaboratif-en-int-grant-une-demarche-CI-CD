@@ -1,14 +1,10 @@
 name: Run SonarCloud on Front-end
 
 on:
-  # push:
-  #   branches:
-  #     - 'main'
   pull_request:
     branches:
       - 'main'
 
-      
 jobs:
   sonar-front:
     runs-on: ubuntu-latest

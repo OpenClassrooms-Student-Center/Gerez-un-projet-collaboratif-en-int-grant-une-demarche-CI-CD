@@ -1,9 +1,9 @@
 name: Run SonarCloud on Front-end
 
 on:
-  push:
-    branches:
-      - 'main'
+  # push:
+  #   branches:
+  #     - 'main'
   pull_request:
     branches:
       - 'main'

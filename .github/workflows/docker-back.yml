@@ -6,7 +6,7 @@ on:
       - "main"
 
 jobs:
-    build:
+    docker-build:
         runs-on: ubuntu-latest
         steps:
         -
@@ -25,7 +25,7 @@ jobs:
             name: Build and push
             uses: docker/build-push-action@v5
             with:
-                context: back/
+                context: ./back
                 file: ./Dockerfile
                 push: true
                 tags: ${{ secrets.DOCKERHUB_USERNAME }}/bobapp-back:latest

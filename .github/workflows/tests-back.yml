@@ -22,7 +22,7 @@ jobs:
           java-version: 11
           cache: 'maven'
 
-      - name: Build with Maven
+      - name: Build and Run tests with Maven
         run: mvn clean install
 
       - name: Archive Jacoco coverage report

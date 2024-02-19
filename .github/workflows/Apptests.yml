@@ -62,3 +62,11 @@ jobs:
         with:
           name: karma-report
           path: front/coverage   
+
+  Sonarcloud-front:
+    needs: Frontend-test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front
+        

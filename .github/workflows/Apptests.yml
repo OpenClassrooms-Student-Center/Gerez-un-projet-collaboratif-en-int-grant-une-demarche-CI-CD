@@ -32,7 +32,7 @@ jobs:
           path: back/target/site/jacoco
           
   Frontend-test:
-    runs-on: ubuntu-lastest
+    runs-on: ubuntu-latest
 
     defaults:
       run:

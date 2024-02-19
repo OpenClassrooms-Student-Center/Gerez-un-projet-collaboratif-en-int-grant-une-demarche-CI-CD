@@ -61,12 +61,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: karma-report
-          path: front/coverage   
-
-  Sonarcloud-front:
-    needs: Frontend-test
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: front
+          path: front/coverage
         

@@ -32,7 +32,7 @@ jobs:
                     context: ./back
                     file: ./back/Dockerfile
                     push: true
-                    tags: ${{ secrets.DOCKERHUB_USERNAME }}/bobapp:latest
+                    tags: ${{ secrets.DOCKERHUB_USERNAME }}/bobapp
 
 
   

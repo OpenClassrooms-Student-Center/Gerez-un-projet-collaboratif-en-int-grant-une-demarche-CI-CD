@@ -1,4 +1,4 @@
-name: Application tests
+name: Frontend tests
 
 on: 
   push: 
@@ -7,30 +7,8 @@ on:
   pull_request:
     branches:
     - main
+
 jobs:
-  Backend-test:
-    runs-on: ubuntu-latest
-
-    defaults:
-      run:
-        working-directory: back
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
-        
-      - name: Test with Maven
-        run: mvn -B clean test
-
-      - name: Upload coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: jacoco-report
-          path: back/target/site/jacoco
-          
   Frontend-test:
     runs-on: ubuntu-latest
 
@@ -62,4 +40,11 @@ jobs:
         with:
           name: karma-report
           path: front/coverage
-        
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: front
+        env:
+          SONARCLOUD_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

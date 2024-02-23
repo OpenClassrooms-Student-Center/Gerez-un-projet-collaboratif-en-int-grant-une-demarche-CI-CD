@@ -40,7 +40,7 @@ jobs:
         with:
           name: karma-report
           path: front/coverage
-
+          
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         with:

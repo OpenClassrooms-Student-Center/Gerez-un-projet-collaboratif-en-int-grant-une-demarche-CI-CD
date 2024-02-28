@@ -122,7 +122,8 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         working-directory: ./back
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar -Dsonar.projectName="project_10" -Dsonar.projectKey=rayanadir_Gerez-un-projet-collaboratif-en-int-grant-une-demarche-CI-CD_1        
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        
   SonarQube-Analysis-FrontEnd:
     name: Frontend
     runs-on: ubuntu-latest
@@ -151,3 +152,4 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         working-directory: ./front
+        run: npm run sonar-scanner

@@ -56,13 +56,12 @@ jobs:
         working-directory: ./back
         run: mvn -B clean test
 
-      - name: Upload coverage report
-        working-directory: ./back
-        uses: actions/upload-artifact@v3
+      - name: Upload Jacoco Report
+        uses: actions/upload-artifact@v2
         with:
           name: jacoco-report
-          path: back/target/site/jacoco
-          
+          path: ./back/target/site/jacoco
+        
   Frontend-Tests:
     runs-on: ubuntu-latest
     needs: [build]
@@ -86,9 +85,8 @@ jobs:
         working-directory: ./front
         run: npm run test:prod
 
-      - name: Upload coverage report
-        working-directory: ./front
+      - name: Upload Karma Report
         uses: actions/upload-artifact@v3
         with:
           name: karma-report
-          path: front/coverage
+          path: ./front/coverage

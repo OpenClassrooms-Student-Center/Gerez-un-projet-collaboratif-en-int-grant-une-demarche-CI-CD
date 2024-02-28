@@ -127,34 +127,29 @@ jobs:
   SonarQube-Analysis-FrontEnd:
     name: Frontend
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./front
-    strategy:
-      matrix:
-        node-version: [16.x]
+    needs: [Backend-Tests, Frontend-Tests]
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
-      
+
       - name: Use Node.js ${{matrix.node-version}}
         uses: actions/setup-node@v3
         with:
           node-version: ${{matrix.node-version}}
       
       - name: Run npm install
+        working-directory: ./front
         run: npm install
       
       - name: Run npm test
+        working-directory: ./front
         run: npm run test:prod
       
-      - name: Build and analyse
-        uses: SonarSource/sonarcloud-github-action@master
-        with:
-          projectBaseDir: ./front
+      - name: SonarQube Analysis
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
-
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        working-directory: ./front
+        run: npm run sonar-scanner

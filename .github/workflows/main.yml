@@ -1,6 +1,7 @@
 name: CI/CD
 run-name: ${{ github.actor }} is working on GitHub Actions !
 on: [push]
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,6 +27,7 @@ jobs:
           tags: ${{secrets.DOCKERHUB_USERNAME}}/bobapp-back:latest
 
       - name: Build and push (Front)
+        id: build-frontend
         uses: docker/build-push-action@v5
         with:
           context: ./front
@@ -33,4 +35,10 @@ jobs:
           push: true
           tags: ${{secrets.DOCKERHUB_USERNAME}}/bobapp-front:latest
 
- 
+include:
+  - name: Backend Tests
+    path: .github/workflows/backend-tests.yml
+
+  - name: Frontend Tests
+    path: .github/workflows/frontend-tests.yml
+    needs: build-frontend

@@ -15,6 +15,7 @@
 	<description>L'application de joke par excellence !</description>
 	<properties>
 		<java.version>11</java.version>
+		<sonar.host.url>https://www.sonarqube.openclassroom.com</sonar.host.url>
 	</properties>
 	<dependencies>
 		<dependency>

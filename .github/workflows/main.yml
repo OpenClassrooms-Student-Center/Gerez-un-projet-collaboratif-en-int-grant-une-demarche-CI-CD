@@ -91,11 +91,11 @@ jobs:
           name: karma-report
           path: ./front/coverage
           
-  SonarQube-Analysis-BackEnd:
+sonarQube-Analysis-Backend:
     runs-on: ubuntu-latest
-    needs: [Backend-Tests, Frontend-Tests]
+    needs: [backendTests, frontendTests]
     steps:
-      - name: Checkout
+      - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Set up JDK 17
@@ -123,33 +123,32 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         working-directory: ./back
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-        
-  SonarQube-Analysis-FrontEnd:
-    name: Frontend
-    runs-on: ubuntu-latest
-    needs: [Backend-Tests, Frontend-Tests]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
 
-      - name: Use Node.js ${{matrix.node-version}}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{matrix.node-version}}
-      
-      - name: Run npm install
-        working-directory: ./front
-        run: npm install
-      
-      - name: Run npm test
-        working-directory: ./front
-        run: npm run test:prod
-      
-      - name: SonarQube Analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        working-directory: ./front
-        run: npm run sonar-scanner
+sonarQubeAnalysisFrontend:
+  runs-on: ubuntu-latest
+  needs: [backendTests, frontendTests]
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Use Node.js ${{matrix.node-version}}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{matrix.node-version}}
+
+    - name: Install Front-end Dependencies
+      working-directory: ./front
+      run: npm install
+
+    - name: Run Front-end Tests
+      working-directory: ./front
+      run: npm run test:prod
+
+    - name: SonarQube Analysis
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
+        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      working-directory: ./front
+      run: npm run sonar-scanner

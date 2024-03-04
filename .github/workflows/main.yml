@@ -36,7 +36,6 @@ jobs:
 
   backendTests:
     runs-on: ubuntu-latest
-    needs: [build]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -64,7 +63,6 @@ jobs:
 
   frontendTests:
     runs-on: ubuntu-latest
-    needs: [build]
     strategy:
       matrix:
         node-version: [16.x]
@@ -91,7 +89,7 @@ jobs:
           name: karma-report
           path: ./front/coverage
 
-  sonarQubeAnalysisBackend:
+  sonarCloudBackend:
     runs-on: ubuntu-latest
     needs: [backendTests, frontendTests]
     steps:
@@ -103,7 +101,7 @@ jobs:
         with:
           java-version: 17
 
-      - name: Cache SonarQube packages
+      - name: Cache SonarCloud packages
         uses: actions/cache@v1
         with:
           path: ~/.sonar/cache
@@ -117,14 +115,14 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: SonarQube Analysis
+      - name: SonarCloud Analysis for Back-end
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         working-directory: ./back
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
-  sonarQubeAnalysisFrontend:
+  sonarCloudFrontend:
     runs-on: ubuntu-latest
     needs: [backendTests, frontendTests]
     steps:
@@ -138,15 +136,21 @@ jobs:
         with:
           node-version: ${{matrix.node-version}}
 
-      - name: Install Front-end Dependencies
-        working-directory: ./front
-        run: npm install
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
-      - name: Run Front-end Tests
-        working-directory: ./front
-        run: npm run test:prod
+      - name: Cache Angular packages
+        uses: actions/cache@v1
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/front/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-npm
 
-      - name: SonarQube Analysis
+      - name: SonarCloud Analysis for Front-end
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

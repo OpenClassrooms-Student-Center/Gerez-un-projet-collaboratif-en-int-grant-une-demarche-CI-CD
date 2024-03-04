@@ -36,6 +36,7 @@ jobs:
 
   backendTests:
     runs-on: ubuntu-latest
+    needs: [build]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -63,6 +64,7 @@ jobs:
 
   frontendTests:
     runs-on: ubuntu-latest
+    needs: [build]
     strategy:
       matrix:
         node-version: [16.x]
@@ -89,7 +91,7 @@ jobs:
           name: karma-report
           path: ./front/coverage
 
-  sonarCloudBackend:
+  sonarQubeAnalysisBackend:
     runs-on: ubuntu-latest
     needs: [backendTests, frontendTests]
     steps:
@@ -101,7 +103,7 @@ jobs:
         with:
           java-version: 17
 
-      - name: Cache SonarCloud packages
+      - name: Cache SonarQube packages
         uses: actions/cache@v1
         with:
           path: ~/.sonar/cache
@@ -115,14 +117,14 @@ jobs:
           key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
           restore-keys: ${{ runner.os }}-m2
 
-      - name: SonarCloud Analysis for Back-end
+      - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         working-directory: ./back
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
-  sonarCloudFrontend:
+  sonarQubeAnalysisFrontend:
     runs-on: ubuntu-latest
     needs: [backendTests, frontendTests]
     steps:
@@ -136,21 +138,15 @@ jobs:
         with:
           node-version: ${{matrix.node-version}}
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
+      - name: Install Front-end Dependencies
+        working-directory: ./front
+        run: npm install
 
-      - name: Cache Angular packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-${{ hashFiles('**/front/package-lock.json') }}
-          restore-keys: ${{ runner.os }}-npm
+      - name: Run Front-end Tests
+        working-directory: ./front
+        run: npm run test:prod
 
-      - name: SonarCloud Analysis for Front-end
+      - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}

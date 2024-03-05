@@ -3,40 +3,33 @@ run-name: ${{ github.actor }} is working on GitHub Actions!
 on: [push]
 
 jobs:
-  build:
+  frontendTests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
         with:
-          username: ${{ secrets.DOCKERHUB_EMAIL }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
+          node-version: 16.x
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+      - name: Install Front-end Dependencies
+        run: npm install
+        working-directory: ./front
 
-      - name: Build and Push Back-end
-        uses: docker/build-push-action@v5
+      - name: Run Front-end Tests
+        run: npm run test:prod
+        working-directory: ./front
+
+      - name: Upload Karma Report
+        uses: actions/upload-artifact@v3
         with:
-          context: ./back
-          file: ./back/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/bobapp-back:latest
-
-      - name: Build and Push Front-end
-        uses: docker/build-push-action@v5
-        with:
-          context: ./front
-          file: ./front/Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/bobapp-front:latest
+          name: karma-report
+          path: ./front/coverage
 
   backendTests:
     runs-on: ubuntu-latest
-    needs: [build]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -49,12 +42,12 @@ jobs:
           architecture: x64
 
       - name: Build with Maven
+        run: mvn -B package --file ./back/pom.xml
         working-directory: ./back
-        run: mvn -B package --file pom.xml
 
       - name: Test with Maven
-        working-directory: ./back
         run: mvn -B clean test
+        working-directory: ./back
 
       - name: Upload Jacoco Report
         uses: actions/upload-artifact@v2
@@ -62,113 +55,48 @@ jobs:
           name: jacoco-report
           path: ./back/target/site/jacoco
 
-  frontendTests:
-    runs-on: ubuntu-latest
-    needs: [build]
-    strategy:
-      matrix:
-        node-version: [16.x]
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Use Node.js ${{matrix.node-version}}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{matrix.node-version}}
-
-      - name: Install Front-end Dependencies
-        working-directory: ./front
-        run: npm install
-
-      - name: Run Front-end Tests
-        working-directory: ./front
-        run: npm run test:prod
-
-      - name: Upload Karma Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: karma-report
-          path: ./front/coverage
-
-  sonarQubeAnalysisBackend:
-    runs-on: ubuntu-latest
-    needs: [backendTests]
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Set up JDK 17
-        uses: actions/setup-java@v1
-        with:
-          java-version: 17
-
-      - name: Cache SonarQube packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
-      - name: Cache Maven packages
-        uses: actions/cache@v1
-        with:
-          path: ~/.m2
-          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
-          restore-keys: ${{ runner.os }}-m2
-
-      - name: Start SonarQube Container
-        run: |
-          docker run -d --name sonarqube \
-            -p 9000:9000 \
-            -v sonarqube_data:/opt/sonarqube/data \
-            -v sonarqube_logs:/opt/sonarqube/logs \
-            -v sonarqube_extensions:/opt/sonarqube/extensions \
-            sonarqube:latest
-
-      - name: SonarQube Analysis
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: http://localhost:9000
-        working-directory: ./back
-        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-
-      - name: Stop SonarQube Container
-        run: docker stop sonarqube
-
   sonarQubeAnalysisFrontend:
     runs-on: ubuntu-latest
-    needs: [frontendTests]
+    needs: frontendTests
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
 
-      - name: Use Node.js ${{matrix.node-version}}
+      - name: Use Node.js 16.x
         uses: actions/setup-node@v3
         with:
-          node-version: ${{matrix.node-version}}
+          node-version: 16.x
 
       - name: Install Front-end Dependencies
-        working-directory: ./front
         run: npm install
-
-      - name: Start SonarQube Container
-        run: |
-          docker run -d --name sonarqube \
-            -p 9000:9000 \
-            -v sonarqube_data:/opt/sonarqube/data \
-            -v sonarqube_logs:/opt/sonarqube/logs \
-            -v sonarqube_extensions:/opt/sonarqube/extensions \
-            sonarqube:latest
+        working-directory: ./front
 
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
-          SONAR_HOST_URL: http://localhost:9000
-        working-directory: ./front
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: npm run sonar-scanner
+        working-directory: ./front
 
-      - name: Stop SonarQube Container
-        run: docker stop sonarqube
+  sonarQubeAnalysisBackend:
+    runs-on: ubuntu-latest
+    needs: backendTests
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          architecture: x64
+
+      - name: SonarQube Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        working-directory: ./back

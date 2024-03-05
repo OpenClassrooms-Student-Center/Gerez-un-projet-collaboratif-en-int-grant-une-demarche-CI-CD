@@ -97,6 +97,6 @@ jobs:
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_HOST_URL: http://localhost:9000
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
         working-directory: ./back

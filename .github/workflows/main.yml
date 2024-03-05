@@ -142,7 +142,7 @@ jobs:
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: http://localhost:9000
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOSR_URL }}
         working-directory: ./back
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
 
@@ -183,7 +183,7 @@ jobs:
       - name: SonarQube Analysis
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
-          SONAR_HOST_URL: http://localhost:9000
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOSR_URL }}
         working-directory: ./front
         run: npm run sonar-scanner
 

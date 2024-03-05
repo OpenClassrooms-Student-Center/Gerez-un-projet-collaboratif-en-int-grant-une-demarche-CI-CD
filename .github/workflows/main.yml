@@ -93,7 +93,11 @@ jobs:
 
   sonarQubeSetup:
     runs-on: ubuntu-latest
+    needs: [build, frontendTests, backendTests]
     steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
       - name: Create SonarQube Volumes
         run: |
           docker volume create --name sonarqube_data
@@ -102,7 +106,7 @@ jobs:
 
   sonarQubeAnalysisBackend:
     runs-on: ubuntu-latest
-    needs: [backendTests, frontendTests, sonarQubeSetup]
+    needs: [backendTests, sonarQubeSetup]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -147,7 +151,7 @@ jobs:
 
   sonarQubeAnalysisFrontend:
     runs-on: ubuntu-latest
-    needs: [backendTests, frontendTests, sonarQubeSetup]
+    needs: [frontendTests, sonarQubeSetup]
     steps:
       - name: Checkout Code
         uses: actions/checkout@v2

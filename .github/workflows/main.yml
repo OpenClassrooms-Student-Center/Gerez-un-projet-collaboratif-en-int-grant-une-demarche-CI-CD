@@ -3,33 +3,9 @@ run-name: ${{ github.actor }} is working on GitHub Actions!
 on: [push]
 
 jobs:
-  frontendTests:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Code
-        uses: actions/checkout@v3
-
-      - name: Use Node.js 16.x
-        uses: actions/setup-node@v1
-        with:
-          node-version: 16.x
-
-      - name: Install Front-end Dependencies
-        run: npm install
-        working-directory: ./front
-
-      - name: Run Front-end Tests
-        run: npm run test:prod
-        working-directory: ./front
-
-      - name: Upload Karma Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: karma-report
-          path: ./front/coverage
 
   build:
-    name: sonarqube
+    name: Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -57,6 +33,31 @@ jobs:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
         run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
         working-directory: ./back
+
+  frontendTests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Use Node.js 16.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 16.x
+
+      - name: Install Front-end Dependencies
+        run: npm install
+        working-directory: ./front
+
+      - name: Run Front-end Tests
+        run: npm run test:prod
+        working-directory: ./front
+
+      - name: Upload Karma Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: karma-report
+          path: ./front/coverage
 
   backendTests:
     runs-on: ubuntu-latest

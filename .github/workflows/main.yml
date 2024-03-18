@@ -5,29 +5,40 @@ on: [push]
 jobs:
 
   sonarqube:
-    name: sonarqube
+    name: SonarQube Analysis
     runs-on: ubuntu-latest
+    services:
+      sonarqube:
+        image: sonarqube:community
+        ports:
+          - 9000:9000
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+
       - name: Set up JDK 17
         uses: actions/setup-java@v1
         with:
           java-version: 17
+
       - name: Cache SonarScanner
         uses: actions/cache@v2
         with:
           path: ~/.sonar/sonarscanner
           key: ${{ runner.os }}-sonarscanner
           restore-keys: ${{ runner.os }}-sonarscanner
+
       - name: Download and Install SonarScanner
         run: |
           mkdir -p ~/.sonar
           curl -L https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -o sonarscanner.zip
           unzip sonarscanner.zip -d ~/.sonar/sonarscanner
-      - name: Build and analyze
+
+      - name: Build and Analyze with SonarScanner
         run: ~/.sonar/sonarscanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner \
+          -Dsonar.host.url=http://sonarqube:9000 \
           -Dsonar.sources=./back,./front
 
   frontendTests:

@@ -35,6 +35,7 @@ jobs:
           mkdir -p ~/.sonar
           curl -L https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -o sonarscanner.zip
           unzip sonarscanner.zip -d ~/.sonar/sonarscanner
+          pwd
 
       - name: Build and Analyze with SonarScanner
         run: ~/.sonar/sonarscanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner \

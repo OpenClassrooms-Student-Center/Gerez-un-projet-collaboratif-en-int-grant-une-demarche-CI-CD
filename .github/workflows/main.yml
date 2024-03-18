@@ -36,14 +36,15 @@ jobs:
           curl -L https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip -o sonarscanner.zip
           unzip sonarscanner.zip -d ~/.sonar/sonarscanner
           
-      - name: Display current directory
-        run: pwd
-        
-      - name: Build and Analyze with SonarScanner
+      - name: Analyze back directory with SonarScanner
         run: ~/.sonar/sonarscanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner \
-         -Dsonar.host.url=http://sonarqube:9000 \
-         -Dsonar.sources=./back,./front
+          -Dsonar.host.url=http://sonarqube:9000 \
+          -Dsonar.sources=./back
 
+      - name: Analyze front directory with SonarScanner
+        run: ~/.sonar/sonarscanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner \
+          -Dsonar.host.url=http://sonarqube:9000 \
+          -Dsonar.sources=./front
 
   frontendTests:
     runs-on: ubuntu-latest

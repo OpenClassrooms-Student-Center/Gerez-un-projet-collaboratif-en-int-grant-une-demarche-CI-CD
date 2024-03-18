@@ -37,7 +37,9 @@ jobs:
           unzip sonarscanner.zip -d ~/.sonar/sonarscanner
           
       - name: Analyze back directory with SonarScanner
-        run: ~/.sonar/sonarscanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner -Dsonar.host.url=http://sonarqube:9000 \ -Dsonar.sources=./back
+        run: |
+          ~/.sonar/sonarscanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner -Dsonar.host.url=http://sonarqube:9000
+          ~/.sonar/sonarscanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner -Dsonar.sources=./back
 
       - name: Analyze front directory with SonarScanner
         run: ~/.sonar/sonarscanner/sonar-scanner-4.6.2.2472-linux/bin/sonar-scanner -Dsonar.host.url=http://sonarqube:9000 \ -Dsonar.sources=./front

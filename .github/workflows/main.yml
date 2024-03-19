@@ -74,11 +74,12 @@ jobs:
         working-directory: ./front
 
       - name: SonarQube Analysis
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          projectBaseDir: ./front
         env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: sonar-scanner -Dsonar.projectKey=your_project_key -Dsonar.sources=src -Dsonar.language=ts
-        working-directory: ./front
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
 
   sonarQubeAnalysisBackend:
     runs-on: ubuntu-latest

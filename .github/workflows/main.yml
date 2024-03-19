@@ -77,7 +77,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        run: npm run sonar-scanner
+        run: sonar-scanner -Dsonar.projectKey=your_project_key -Dsonar.sources=src -Dsonar.language=ts
         working-directory: ./front
 
   sonarQubeAnalysisBackend:

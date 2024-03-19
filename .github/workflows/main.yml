@@ -57,14 +57,20 @@ jobs:
 
   sonarQubeAnalysisFrontend:
     runs-on: ubuntu-latest
+    needs: frontendTests
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout Code
+        uses: actions/checkout@v2
         with:
           fetch-depth: 0  
-      - uses: sonarsource/sonarqube-scan-action@master
+      - name: Set working directory to frontend
+        working-directory: ./front
+      - name: SonarQube Analysis
+        uses: sonarsource/sonarqube-scan-action@master
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+
 
   sonarQubeAnalysisBackend:
     runs-on: ubuntu-latest

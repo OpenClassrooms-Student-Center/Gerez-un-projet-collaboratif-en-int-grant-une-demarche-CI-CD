@@ -3,7 +3,7 @@ run-name: ${{ github.actor }} is working on GitHub Actions!
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   frontendTests:

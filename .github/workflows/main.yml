@@ -58,46 +58,46 @@ jobs:
           name: jacoco-report
           path: ./back/target/site/jacoco
 
-    sonarQubeAnalysisFrontend:
-      runs-on: ubuntu-latest
-      needs: frontendTests
-      steps:
-        - name: Checkout Code
-          uses: actions/checkout@v2
-          with:
-            fetch-depth: 0  
-        - name: Set working directory to frontend
-          run: echo "Setting working directory to frontend"
-          working-directory: ./front
-        - name: SonarQube Analysis
-          uses: sonarsource/sonarqube-scan-action@master
-          env:
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-        - name: Upload SonarQube Report
-          uses: actions/upload-artifact@v2
-          with:
-            name: sonarqube-report
-            path: .scannerwork/report-task.txt
+  sonarQubeAnalysisFrontend:
+    runs-on: ubuntu-latest
+    needs: frontendTests
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+           fetch-depth: 0  
+      - name: Set working directory to frontend
+        run: echo "Setting working directory to frontend"
+        working-directory: ./front
+      - name: SonarQube Analysis
+        uses: sonarsource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: Upload SonarQube Report
+        uses: actions/upload-artifact@v2
+        with:
+           name: sonarqube-report
+           path: .scannerwork/report-task.txt
 
-    sonarQubeAnalysisBackend:
-      runs-on: ubuntu-latest
-      needs: backendTests
-      steps:
-        - name: Checkout Code
-          uses: actions/checkout@v3
-        - name: SonarQube Analysis
-          env:
-            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-            SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-            SONAR_PROJECT_KEY: bobapp
-          run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-          working-directory: ./back
-        - name: Upload SonarQube Report
-          uses: actions/upload-artifact@v2
-          with:
-            name: sonarqube-report
-            path: .scannerwork/report-task.txt
+  sonarQubeAnalysisBackend:
+    runs-on: ubuntu-latest
+    needs: backendTests
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: SonarQube Analysis
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          SONAR_PROJECT_KEY: bobapp
+        run: mvn -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+        working-directory: ./back
+      - name: Upload SonarQube Report
+        uses: actions/upload-artifact@v2
+        with:
+          name: sonarqube-report
+          path: .scannerwork/report-task.txt
 
   build:
     runs-on: ubuntu-latest

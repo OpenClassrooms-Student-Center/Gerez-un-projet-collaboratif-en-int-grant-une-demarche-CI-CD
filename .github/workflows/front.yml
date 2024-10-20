@@ -9,3 +9,28 @@ on:
     branches:
       - main
       - develop
+
+jobs:
+  frontend-testing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: Install Dependencies and Run Tests
+        working-directory: front
+        run: |
+          npm install
+          npx ng test --watch=false --code-coverage
+
+      - name: Upload Code Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: front/coverage/

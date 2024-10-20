@@ -1,0 +1,16 @@
+name: Front-end CI/CD with Tests, SonarCloud & Docker
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'front/**'
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'front/**'
+
+jobs:

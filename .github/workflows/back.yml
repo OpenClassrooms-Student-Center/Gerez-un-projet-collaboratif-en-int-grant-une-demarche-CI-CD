@@ -9,3 +9,29 @@ on:
     branches:
       - main
       - develop
+
+jobs:
+  backend-testing:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Install Dependencies and Run Tests
+        working-directory: back
+        run: |
+          mvn clean install
+          mvn test jacoco:report
+
+      - name: Upload Code Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: back/target/site/jacoco/

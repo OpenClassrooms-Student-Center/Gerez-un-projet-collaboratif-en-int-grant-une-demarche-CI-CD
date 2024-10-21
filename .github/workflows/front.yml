@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Shallow clones
 
       - name: Set Up Node.js
         uses: actions/setup-node@v2
@@ -42,6 +44,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Shallow clones
 
       - name: Set Up Node.js
         uses: actions/setup-node@v2
@@ -55,6 +59,6 @@ jobs:
           args: >
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORG }}
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+            -Dsonar.token=REMOVED secrets.SONAR_TOKEN }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

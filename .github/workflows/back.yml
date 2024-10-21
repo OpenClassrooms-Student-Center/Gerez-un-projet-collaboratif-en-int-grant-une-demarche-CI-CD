@@ -56,7 +56,7 @@ jobs:
 
       - name: Build with Maven
         working-directory: back
-        run: mvn clean compile
+        run: mvn clean package
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2

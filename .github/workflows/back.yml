@@ -35,3 +35,24 @@ jobs:
         with:
           name: coverage-report
           path: back/target/site/jacoco/
+
+  sonarcloud-analysis:
+    needs: backend-testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: back
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

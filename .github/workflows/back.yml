@@ -4,12 +4,8 @@ on:
   push:
     branches:
       - develop
-    paths:
-      - 'back/**'
 
   pull_request:
     branches:
       - main
       - develop
-    paths:
-      - 'back/**'

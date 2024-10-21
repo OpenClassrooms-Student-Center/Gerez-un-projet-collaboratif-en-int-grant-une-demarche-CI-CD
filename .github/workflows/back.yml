@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Shallow clones
 
       - name: Set up Java
         uses: actions/setup-java@v2
@@ -35,3 +37,35 @@ jobs:
         with:
           name: coverage-report
           path: back/target/site/jacoco/
+
+  sonarcloud-analysis:
+    needs: backend-testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Shallow clones
+
+      - name: Set up Java
+        uses: actions/setup-java@v2
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+
+      - name: Build with Maven
+        working-directory: back
+        run: mvn clean package
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          args: >
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORG }}
+            -Dsonar.token=REMOVED secrets.SONAR_TOKEN }}
+            -Dsonar.java.binaries=back/target/classes
+            -Dsonar.java.libraries=back/target/*.jar
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

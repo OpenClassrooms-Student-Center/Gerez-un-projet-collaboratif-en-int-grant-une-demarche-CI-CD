@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Shallow clones
 
       - name: Set Up Node.js
         uses: actions/setup-node@v2
@@ -34,3 +36,29 @@ jobs:
         with:
           name: coverage-report
           path: front/coverage/
+
+  sonarcloud-analysis:
+    needs: frontend-testing
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Shallow clones
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: front
+          args: >
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORG }}
+            -Dsonar.token=REMOVED secrets.SONAR_TOKEN }}
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

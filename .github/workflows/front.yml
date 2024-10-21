@@ -27,7 +27,7 @@ jobs:
         working-directory: front
         run: |
           npm install
-          npx ng test --watch=false --code-coverage
+          npx ng test --watch=false --code-coverage --browsers=ChromeHeadless
 
       - name: Upload Code Coverage Report
         uses: actions/upload-artifact@v3

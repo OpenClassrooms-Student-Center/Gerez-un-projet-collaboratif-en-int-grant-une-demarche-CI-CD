@@ -70,6 +70,7 @@ jobs:
             -Dsonar.token=REMOVED secrets.SONAR_TOKEN }}
             -Dsonar.java.binaries=back/target/classes
             -Dsonar.java.libraries=back/target/*.jar
+            -Dsonar.coverage.jacoco.xmlReportPaths=back/target/site/jacoco/jacoco.xml
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 

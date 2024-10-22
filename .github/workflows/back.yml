@@ -34,6 +34,12 @@ jobs:
           mvn clean install
           mvn test jacoco:report
 
+      - name: Upload Code Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-report
+          path: back/target/site/jacoco/
+
   # 2. Code quality verification with SonarCloud and Docker build
   sonarcloud-analysis:
     needs: backend-testing
@@ -66,23 +72,6 @@ jobs:
             -Dsonar.java.libraries=back/target/*.jar
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-  # 3. Automatic generation of coverage reports
-  coverage-report:
-    runs-on: ubuntu-latest
-    needs: backend-testing
-
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0 # Shallow clones
-
-      - name: Upload Code Coverage Report
-        uses: actions/upload-artifact@v3
-        with:
-          name: coverage-report
-          path: back/target/site/jacoco/
 
   # 4. Docker build and push
   docker-build-and-push:

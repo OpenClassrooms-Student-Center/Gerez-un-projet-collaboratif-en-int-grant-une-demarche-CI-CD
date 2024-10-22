@@ -66,13 +66,6 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
-      - name: Log in to Docker Hub (for building)
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: Build Docker Image
-        run: |
-          docker build -t bobapp-back ./back
-
   # 3. Automatic generation of coverage reports
   coverage-report:
     runs-on: ubuntu-latest
@@ -89,3 +82,21 @@ jobs:
         with:
           name: coverage-report
           path: back/target/site/jacoco/
+
+  # 4. Docker build and push
+  docker-build-and-push:
+    needs: sonarcloud-analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build and Push Docker Image
+        run: |
+          docker build -t bobapp-back ./back
+          docker tag bobapp-back ${{ secrets.DOCKER_USERNAME }}/bobapp-back:latest
+          docker push ${{ secrets.DOCKER_USERNAME }}/bobapp-back:latest

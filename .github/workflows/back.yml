@@ -4,12 +4,14 @@ on:
   push:
     branches:
       - develop
-      - main
+    paths:
+      - 'back/**'
 
   pull_request:
     branches:
       - main
-      - develop
+    paths:
+      - 'back/**'
 
 jobs:
   # 1. Validates tests on a pull request
@@ -57,19 +59,10 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
-      - name: Build with Maven
-        working-directory: back
-        run: mvn clean package
-
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:
-          args: >
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.organization=${{ secrets.SONAR_ORG }}
-            -Dsonar.token=REMOVED secrets.SONAR_TOKEN }}
-            -Dsonar.java.binaries=back/target/classes
-            -Dsonar.java.libraries=back/target/*.jar
+          projectBaseDir: back
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 

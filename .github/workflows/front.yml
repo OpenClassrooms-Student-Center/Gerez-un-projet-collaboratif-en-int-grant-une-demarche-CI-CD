@@ -4,12 +4,14 @@ on:
   push:
     branches:
       - develop
-      - main
+    paths:
+      - 'front/**'
 
   pull_request:
     branches:
       - main
-      - develop
+    paths:
+      - 'front/**'
 
 jobs:
   # 1. Validates tests on a pull request
@@ -59,10 +61,6 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@v2
         with:
           projectBaseDir: front
-          args: >
-            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
-            -Dsonar.organization=${{ secrets.SONAR_ORG }}
-            -Dsonar.token=REMOVED secrets.SONAR_TOKEN }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 

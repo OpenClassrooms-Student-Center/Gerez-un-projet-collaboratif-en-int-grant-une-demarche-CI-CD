@@ -22,7 +22,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0 # Shallow clones
+          fetch-depth: 0
 
       - name: Set Up Node.js
         uses: actions/setup-node@v2
@@ -50,7 +50,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0 # Shallow clones
+          fetch-depth: 0
 
       - name: Set Up Node.js
         uses: actions/setup-node@v2

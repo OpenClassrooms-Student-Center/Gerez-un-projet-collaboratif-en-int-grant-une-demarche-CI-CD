@@ -59,6 +59,10 @@ jobs:
           java-version: '11'
           distribution: 'temurin'
 
+      - name: Build with Maven
+        working-directory: back
+        run: mvn clean package
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         with:

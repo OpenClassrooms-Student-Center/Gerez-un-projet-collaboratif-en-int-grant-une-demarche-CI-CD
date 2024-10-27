@@ -1,4 +1,4 @@
-name: Front-end CI/CD with Tests, SonarCloud & Docker
+name: Front-end CI/CD with coverage report, SonarCloud analysis & Docker image
 
 on:
   push:
@@ -10,8 +10,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - 'front/**'
 
 jobs:
   # 1. Validates tests on a pull request
@@ -59,9 +57,16 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: front
+          args: >
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}-front
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
+          SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+          SONAR_ORGANIZATION: ${{ secrets.SONAR_ORGANIZATION }}
   # 4. Docker build and push
   docker-build-and-push:
     needs: sonarcloud-analysis

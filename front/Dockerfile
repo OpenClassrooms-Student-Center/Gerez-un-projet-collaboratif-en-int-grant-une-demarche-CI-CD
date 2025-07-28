@@ -1,14 +1,12 @@
-FROM node:latest as build
+FROM node:18
 
-WORKDIR /usr/local/app
-COPY ./ /usr/local/app/
+WORKDIR /app
 
-RUN yarn
-RUN npm run build
- 
-FROM nginx:latest as production
+COPY package*.json ./
+RUN npm install -g @angular/cli && npm install
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /usr/local/app/dist/bobapp /usr/share/nginx/html
+COPY . .
 
-EXPOSE 80
+EXPOSE 4200
+
+CMD ["npm", "start"]

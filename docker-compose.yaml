@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  back:
+    container_name: app-back
+    build:
+      context: ./back
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    networks:
+      - bobapp-network
+
+  front:
+    container_name: app-front
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    ports:
+      - "4200:4200"
+    depends_on:
+      - back
+    networks:
+      - bobapp-network
+    volumes:
+      - ./front:/app
+      - /app/node_modules
+    command: >
+      sh -c "npm install && npx ng serve --host 0.0.0.0 --port 4200 --proxy-config proxy.config.json"
+
+networks:
+  bobapp-network:
+    driver: bridge

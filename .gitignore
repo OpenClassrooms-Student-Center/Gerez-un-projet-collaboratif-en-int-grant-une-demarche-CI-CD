@@ -39,3 +39,6 @@ build/
 .mvn
 
 .angular
+
+### Sonar ###
+**/.DS_Store

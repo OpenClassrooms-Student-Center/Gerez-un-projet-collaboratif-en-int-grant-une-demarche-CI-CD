@@ -1,0 +1,24 @@
+name: BobApp CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  ci-front:
+    uses: ./.github/workflows/ci-front.yml
+    secrets: inherit
+
+  ci-back:
+    uses: ./.github/workflows/ci-back.yml
+    secrets: inherit
+
+  docker-publish:
+    needs: [ ci-front, ci-back ]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    uses: ./.github/workflows/docker-publish.yml
+    secrets: inherit

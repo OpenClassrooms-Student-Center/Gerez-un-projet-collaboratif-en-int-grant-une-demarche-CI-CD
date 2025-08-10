@@ -1,0 +1,109 @@
+# This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
+
+name: Build, Test & Report
+
+on:
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  frontend:
+    name: Frontend Build & Test
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: ["16.10.0"]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+          cache-dependency-path: front/package-lock.json
+
+      - run: npm ci
+        working-directory: front
+
+      - run: npm run build --if-present
+        working-directory: front
+
+      - run: npm test -- --browsers ChromeHeadless --watch=false --code-coverage
+        working-directory: front
+        continue-on-error: true
+
+      - name: List test output files
+        run: ls -R front/coverage/bobapp/junit || echo "No junit output found"
+
+      - name: Frontend Test report
+        uses: dorny/test-reporter@v1
+        id: test-report
+        if: success() || failure()
+        with:
+          name: Karma Test Report
+          path: front/coverage/bobapp/junit/junit.xml
+          reporter: java-junit
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage-report
+          path: front/coverage/
+
+      - name: SonarCloud Scan (frontend)
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: front
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+  backend:
+    name: Backend Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 11
+        uses: actions/setup-java@v4
+        with:
+          java-version: "11"
+          distribution: "temurin"
+
+      - name: Cache Maven dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.m2
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+      - name: Install dependencies and run tests on backend
+        working-directory: back
+        run: mvn clean verify
+
+      - name: Backend test report
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: Backend Test Report
+          path: back/target/surefire-reports/*.xml
+          reporter: java-junit
+
+      - name: Upload JaCoCo coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: back/target
+
+      - name: SonarCloud Scan (backend)
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: back
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

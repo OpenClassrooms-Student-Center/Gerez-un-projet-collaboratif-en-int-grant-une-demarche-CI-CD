@@ -1,0 +1,42 @@
+name: CI Frontend Angular
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - 'front/**'         # déclenche uniquement si des fichiers front ont changé
+  push:
+    branches-ignore:
+      - main
+    paths:
+      - 'front/**'
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install Chrome dependencies
+        run: sudo apt-get update && sudo apt-get install -y libnss3 libatk-bridge2.0-0 libxss1 libasound2-data
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Run Karma tests with coverage
+        run: npm run test -- --watch=false --browsers=ChromeHeadless --code-coverage
+
+      - name: Upload Frontend Coverage Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: front/coverage/bobapp/lcov.info

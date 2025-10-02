@@ -1,57 +1,116 @@
-# BobApp
+🎨 Front-end
 
-Clone project:
+Le projet Front-end est un module Angular géré via le pipeline CI/CD GitHub Actions.
 
-> git clone XXXXX
+Install dependencies (si nécessaire pour modifications locales) :
+cd front
+npm install
+⚠️ Les builds et déploiements sont automatisés via GitHub Actions et Docker Hub.
 
-## Front-end 
 
-Go inside folder the front folder:
+⚙️ Back-end
+Le projet Back-end est un module Spring Boot géré via le pipeline CI/CD GitHub Actions.
 
-> cd front
+Install dependencies (si nécessaire pour modifications locales) :
 
-Install dependencies:
+cd back
+mvn clean install
+⚠️ Les builds, tests, analyses SonarCloud et déploiements Docker sont automatisés via GitHub Actions.
 
-> npm install
+📝 Fichier de configuration
+Le projet Back utilise un fichier application.properties pour la configuration du pipeline et de SonarCloud :
 
-Launch Front-end:
+# Projet global
+sonar.projectKey=...
+sonar.organization=...
+sonar.host.url=https://sonarcloud.io
+sonar.modules=back,front
 
-> npm run start;
 
-### Docker
+# BACK
+back.sonar.projectBaseDir=back
+back.sonar.sources=src/main/java
+back.sonar.tests=src/test/java
+back.sonar.java.binaries=target/classes
+back.sonar.java.coveragePlugin=jacoco
+back.sonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml
 
-Build the container:
 
-> docker build -t bobapp-front .  
+# FRONT
+front.sonar.projectBaseDir=front
+front.sonar.sources=src/app
+front.sonar.tests=src
+front.sonar.test.inclusions=**/*.spec.ts
+front.sonar.javascript.lcov.reportPaths=coverage/lcov.info
 
-Start the container:
+⚠️ Ce fichier configure les paramètres d’analyse SonarCloud pour les deux modules.
 
-> docker run -p 8080:8080 --name bobapp-front -d bobapp-front
+⚡ CI/CD & Docker Hub
 
-## Back-end
+Le pipeline GitHub Actions automatise la construction, les tests, l’analyse Sonar et le déploiement Docker pour Front et Back de manière indépendante.
 
-Go inside folder the back folder:
+🛠️ Étapes du workflow
 
-> cd back
+# Frontend
 
-Install dependencies:
+Build Angular et installation des dépendances
 
-> mvn clean install
+Tests unitaires avec Karma et génération du coverage
 
-Launch Back-end:
+Analyse qualité sur SonarCloud
 
->  mvn spring-boot:run
+Build et push Docker Hub (latest et SHA commit)
 
-Launch the tests:
+# Backend
 
-> mvn clean install
+Build Spring Boot et installation des dépendances
 
-### Docker
+Tests unitaires avec Maven et génération du coverage Jacoco
 
-Build the container:
+Analyse qualité sur SonarCloud
 
-> docker build -t bobapp-back .  
+Build et push Docker Hub (latest et SHA commit)
 
-Start the container:
+Pipeline simplifié :
+Frontend + Tests ---> SonarCloud ---> Docker Hub
+Backend + Tests ---> SonarCloud ---> Docker Hub
 
-> docker run -p 8080:8080 --name bobapp-back -d bobapp-back 
+🔑 GitHub Actions secrets
+
+DOCKERHUB_USERNAME → username Docker Hub
+
+DOCKERHUB_TOKEN → token avec droits Read/Write/Delete
+
+SONAR_TOKEN → token SonarCloud
+
+📊 KPIs & Analyse des métriques
+KPI	Module	Source	Objectif
+Couverture tests	        Back	Jacoco XML	≥ 80%
+Couverture tests	        Front	Karma / lcov	≥ 80%
+Bugs / Vulnérabilités	    Back / Front	SonarCloud	Niveau A
+Temps de build	Global	    GitHub Actions	≤ 10 min
+Disponibilité Docker	    Back / Front	Docker Hub	100%
+
+📝 Analyse des métriques et retours des utilisateurs
+
+Front et Back déployés et analysés indépendamment → flexibilité maximale
+
+Pipeline automatisé → moins d’erreurs manuelles
+
+Images Docker fiables sur Docker Hub
+
+Possibilité de rollback grâce au tag SHA unique
+
+Temps moyen du pipeline : ~5 min
+
+
+💡 Recommandations
+
+Surveiller régulièrement la couverture et la qualité du code via SonarCloud
+
+Ajouter des tests e2e pour le Front et le Back
+
+Mettre en place notifications GitHub en cas d’échec du pipeline
+
+Le fichier application.properties doit être correctement configuré pour le pipeline
+

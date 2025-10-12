@@ -1,0 +1,175 @@
+name: SonarCloud Quality
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  SONAR_HOST_URL: https://sonarcloud.io
+  SONAR_ORG: bem92
+  SONAR_BACKEND_PROJECT_KEY: ${{ vars.SONAR_BACKEND_PROJECT_KEY || 'back-bob-app' }}
+  SONAR_FRONTEND_PROJECT_KEY: ${{ vars.SONAR_FRONTEND_PROJECT_KEY || 'front-bob-app' }}
+
+jobs:
+  sonar-backend:
+    name: Backend · SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect backend (Maven/Gradle)
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+          dir=""
+          tool=""
+          if candidate=$(find . -maxdepth 2 -name pom.xml -print | head -n 1); then
+            dir="$(dirname "${candidate#./}")"
+            tool="maven"
+          elif candidate=$(find . -maxdepth 2 \( -name build.gradle -o -name build.gradle.kts \) -print | head -n 1); then
+            dir="$(dirname "${candidate#./}")"
+            tool="gradle"
+          fi
+          echo "dir=${dir}"   >> "$GITHUB_OUTPUT"
+          echo "tool=${tool}" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if no backend
+        if: steps.detect.outputs.tool == ''
+        run: echo "No backend detected; skipping."
+
+      - name: Set up JDK 17
+        if: steps.detect.outputs.tool != ''
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Run backend tests with coverage (Maven)
+        if: steps.detect.outputs.tool == 'maven'
+        working-directory: ${{ steps.detect.outputs.dir }}
+        run: |
+          set -euo pipefail
+          mvn -B -DskipTests=false \
+            org.jacoco:jacoco-maven-plugin:prepare-agent test \
+            org.jacoco:jacoco-maven-plugin:report
+
+      - name: Run backend tests with coverage (Gradle)
+        if: steps.detect.outputs.tool == 'gradle'
+        working-directory: ${{ steps.detect.outputs.dir }}
+        run: |
+          set -euo pipefail
+          chmod +x ./gradlew || true
+          ./gradlew test jacocoTestReport || ./gradlew test
+
+      - name: Locate backend binaries & JaCoCo report
+        if: steps.detect.outputs.tool != ''
+        id: paths
+        working-directory: ${{ steps.detect.outputs.dir }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          classes=""
+          for c in "target/classes" "build/classes/java/main" "build/classes/kotlin/main"; do
+            [ -d "$c" ] && classes="$c" && break
+          done
+          report=$(find . -type f -name "*.xml" \( -path "*/jacoco/*" -o -path "*/reports/jacoco/*" \) -print | head -n 1 || true)
+          echo "classes=${classes}" >> "$GITHUB_OUTPUT"
+          echo "report=${report}"   >> "$GITHUB_OUTPUT"
+
+      - name: SonarCloud Scan (backend)
+        if: steps.detect.outputs.tool != ''
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACK }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.organization=${{ env.SONAR_ORG }}
+            -Dsonar.projectKey=${{ env.SONAR_BACKEND_PROJECT_KEY }}
+            -Dsonar.projectBaseDir=${{ steps.detect.outputs.dir }}
+            -Dsonar.sources=src/main
+            -Dsonar.tests=src/test
+            -Dsonar.java.binaries=${{ steps.paths.outputs.classes }}
+            ${{ steps.paths.outputs.report && format('-Dsonar.coverage.jacoco.xmlReportPaths={0}', steps.paths.outputs.report) || '' }}
+
+  sonar-frontend:
+    name: Frontend · SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Detect frontend
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+          root=""
+          if candidate=$(find . -maxdepth 2 -name package.json -not -path "*/node_modules/*" -print | head -n 1); then
+            root="$(dirname "${candidate#./}")"
+          fi
+          echo "root=${root}" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if no frontend
+        if: steps.detect.outputs.root == ''
+        run: echo "No frontend detected; skipping."
+
+      - name: Set up Node.js
+        if: steps.detect.outputs.root != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: npm
+          cache-dependency-path: ${{ steps.detect.outputs.root }}/package-lock.json
+
+      - name: Install deps
+        if: steps.detect.outputs.root != ''
+        working-directory: ${{ steps.detect.outputs.root }}
+        run: npm ci
+
+      - name: Run frontend tests with coverage
+        if: steps.detect.outputs.root != ''
+        working-directory: ${{ steps.detect.outputs.root }}
+        env:
+          CI: 'true'
+        run: |
+          set -euo pipefail
+          if npm test -- --watch=false --code-coverage --browsers=ChromeHeadless; then
+            echo "Angular/Karma coverage generated"
+          else
+            echo "Fallback to generic coverage"
+            npm test -- --coverage
+          fi
+
+      - name: Locate lcov
+        if: steps.detect.outputs.root != ''
+        id: cov
+        working-directory: ${{ steps.detect.outputs.root }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          lcov=$(find . -type f -name "lcov.info" -print | head -n 1 || true)
+          echo "lcov=${lcov}" >> "$GITHUB_OUTPUT"
+
+      - name: SonarCloud Scan (frontend)
+        if: steps.detect.outputs.root != ''
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.organization=${{ env.SONAR_ORG }}
+            -Dsonar.projectKey=${{ env.SONAR_FRONTEND_PROJECT_KEY }}
+            -Dsonar.projectBaseDir=${{ steps.detect.outputs.root }}
+            -Dsonar.sources=src
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.spec.ts,**/*.test.ts,**/*.spec.tsx,**/*.test.tsx
+            ${{ steps.cov.outputs.lcov && format('-Dsonar.javascript.lcov.reportPaths={0}', steps.cov.outputs.lcov) || '' }}
+            ${{ steps.cov.outputs.lcov && format('-Dsonar.typescript.lcov.reportPaths={0}', steps.cov.outputs.lcov) || '' }}

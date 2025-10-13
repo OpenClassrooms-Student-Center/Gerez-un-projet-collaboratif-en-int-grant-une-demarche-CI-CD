@@ -115,19 +115,48 @@ jobs:
 
       - name: Locate backend coverage inputs
         id: backend-inputs
-        working-directory: back
         run: |
           set -euo pipefail
+
+          project_dir="back"
+          candidates=(
+            "$project_dir/target"
+            target
+            "$project_dir"/*/target
+            */target
+          )
+
           target_dir=""
-          if [ -d target ]; then
-            target_dir="target"
-          else
-            target_dir=$(find . -maxdepth 5 -type d -path '*/target' -print | head -n 1 || true)
+          for candidate in "${candidates[@]}"; do
+            [ -e "$candidate" ] || continue
+            if [ -d "$candidate" ]; then
+              target_dir="$candidate"
+              break
+            fi
+          done
+
+          if [ -z "$target_dir" ]; then
+            target_dir=$(find "$project_dir" -maxdepth 6 -type d -name target -print | head -n 1 || true)
+          fi
+          if [ -z "$target_dir" ]; then
+            target_dir=$(find . -maxdepth 6 -type d -name target -print | head -n 1 || true)
           fi
           if [ -z "$target_dir" ]; then
             echo "Unable to locate backend target directory in downloaded artifacts" >&2
             exit 1
           fi
+
+          case "$target_dir" in
+            ./*) target_dir=${target_dir#./} ;;
+          esac
+
+          if [[ "$target_dir" != "$project_dir"/* ]]; then
+            rm -rf "$project_dir/target"
+            mkdir -p "$project_dir"
+            mv "$target_dir" "$project_dir/target"
+            target_dir="$project_dir/target"
+          fi
+
           if [ -d "$target_dir/classes" ]; then
             classes="$target_dir/classes"
           else
@@ -137,6 +166,7 @@ jobs:
             echo "Unable to locate compiled classes in downloaded artifacts" >&2
             exit 1
           fi
+
           jacoco=""
           for candidate in \
             "$target_dir/site/jacoco/jacoco.xml" \
@@ -154,6 +184,21 @@ jobs:
             echo "Unable to locate JaCoCo XML report in downloaded artifacts" >&2
             exit 1
           fi
+
+          if [[ "$classes" == "$project_dir"/* ]]; then
+            classes=${classes#$project_dir/}
+          else
+            echo "Compiled classes are not under $project_dir" >&2
+            exit 1
+          fi
+
+          if [[ "$jacoco" == "$project_dir"/* ]]; then
+            jacoco=${jacoco#$project_dir/}
+          else
+            echo "JaCoCo report is not under $project_dir" >&2
+            exit 1
+          fi
+
           echo "classes=${classes}" >> "$GITHUB_OUTPUT"
           echo "jacoco=${jacoco}" >> "$GITHUB_OUTPUT"
 

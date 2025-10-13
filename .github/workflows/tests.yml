@@ -118,14 +118,20 @@ jobs:
         working-directory: back
         run: |
           set -euo pipefail
-          if [ ! -d target ]; then
-            echo "No backend target directory found in artifacts" >&2
+          target_dir=""
+          if [ -d target ]; then
+            target_dir="target"
+          else
+            target_dir=$(find . -maxdepth 5 -type d -path '*/target' -print | head -n 1 || true)
+          fi
+          if [ -z "$target_dir" ]; then
+            echo "Unable to locate backend target directory in downloaded artifacts" >&2
             exit 1
           fi
-          if [ -d target/classes ]; then
-            classes="target/classes"
+          if [ -d "$target_dir/classes" ]; then
+            classes="$target_dir/classes"
           else
-            classes=$(find target -type d -path '*/classes' -print | head -n 1 || true)
+            classes=$(find "$target_dir" -type d -path '*/classes' -print | head -n 1 || true)
           fi
           if [ -z "$classes" ]; then
             echo "Unable to locate compiled classes in downloaded artifacts" >&2
@@ -133,8 +139,8 @@ jobs:
           fi
           jacoco=""
           for candidate in \
-            target/site/jacoco/jacoco.xml \
-            target/site/jacoco-aggregate/jacoco.xml
+            "$target_dir/site/jacoco/jacoco.xml" \
+            "$target_dir/site/jacoco-aggregate/jacoco.xml"
           do
             if [ -f "$candidate" ]; then
               jacoco="$candidate"
@@ -142,7 +148,7 @@ jobs:
             fi
           done
           if [ -z "$jacoco" ]; then
-            jacoco=$(find target -type f -name 'jacoco*.xml' -print | head -n 1 || true)
+            jacoco=$(find "$target_dir" -type f -name 'jacoco*.xml' -print | head -n 1 || true)
           fi
           if [ -z "$jacoco" ]; then
             echo "Unable to locate JaCoCo XML report in downloaded artifacts" >&2

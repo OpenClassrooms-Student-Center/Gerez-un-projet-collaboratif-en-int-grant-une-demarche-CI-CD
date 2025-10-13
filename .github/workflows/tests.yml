@@ -4,6 +4,16 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  SONAR_HOST_URL: https://sonarcloud.io
+  SONAR_ORG: bem92
+  SONAR_BACKEND_PROJECT_KEY: ${{ vars.SONAR_BACKEND_PROJECT_KEY || 'back-bob-app' }}
+  SONAR_FRONTEND_PROJECT_KEY: ${{ vars.SONAR_FRONTEND_PROJECT_KEY || 'front-bob-app' }}
+
 jobs:
   backend:
     runs-on: ubuntu-latest
@@ -13,22 +23,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 11
-      - name: Run backend tests
-        run: mvn -B test
+          java-version: 17
+
+      - name: Run backend tests with coverage
+        run: |
+          set -euo pipefail
+          mvn -B -DskipTests=false \
+            org.jacoco:jacoco-maven-plugin:prepare-agent test \
+            org.jacoco:jacoco-maven-plugin:report
+
       - name: Upload backend artifacts
         uses: actions/upload-artifact@v4
         with:
           name: backend-artifacts
           if-no-files-found: ignore
           path: |
-            back/target/surefire-reports/**
-            back/target/site/jacoco/**
-            back/target/jacoco*.exec
+            back/target/**
+            back/pom.xml
 
   frontend:
     runs-on: ubuntu-latest
@@ -38,16 +54,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
+
       - name: Set up Chrome
         uses: browser-actions/setup-chrome@v1
+
       - name: Install dependencies
         run: npm ci
+
       - name: Run frontend tests
-        run: npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
+        env:
+          CI: 'true'
+          NG_CLI_ANALYTICS: 'false'
+        run: |
+          set -euo pipefail
+          if npm test -- --watch=false --code-coverage --browsers=ChromeHeadless; then
+            echo "Angular/Karma coverage generated"
+          else
+            echo "Fallback to generic coverage"
+            npm test -- --coverage
+          fi
+
       - name: Upload frontend artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -56,3 +87,198 @@ jobs:
           path: |
             front/coverage/**
             front/test-results/**/*.xml
+            front/package.json
+            front/angular.json
+
+  sonar-backend:
+    name: Backend · SonarCloud
+    needs: backend
+    if: needs.backend.result == 'success' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download backend artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-artifacts
+          path: .
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Locate backend coverage inputs
+        id: backend-inputs
+        run: |
+          set -euo pipefail
+
+          project_dir="back"
+          candidates=(
+            "$project_dir/target"
+            target
+            "$project_dir"/*/target
+            */target
+          )
+
+          target_dir=""
+          for candidate in "${candidates[@]}"; do
+            [ -e "$candidate" ] || continue
+            if [ -d "$candidate" ]; then
+              target_dir="$candidate"
+              break
+            fi
+          done
+
+          if [ -z "$target_dir" ]; then
+            target_dir=$(find "$project_dir" -maxdepth 6 -type d -name target -print | head -n 1 || true)
+          fi
+          if [ -z "$target_dir" ]; then
+            target_dir=$(find . -maxdepth 6 -type d -name target -print | head -n 1 || true)
+          fi
+          if [ -z "$target_dir" ]; then
+            echo "Unable to locate backend target directory in downloaded artifacts" >&2
+            exit 1
+          fi
+
+          case "$target_dir" in
+            ./*) target_dir=${target_dir#./} ;;
+          esac
+
+          if [[ "$target_dir" != "$project_dir"/* ]]; then
+            rm -rf "$project_dir/target"
+            mkdir -p "$project_dir"
+            mv "$target_dir" "$project_dir/target"
+            target_dir="$project_dir/target"
+          fi
+
+          if [ -d "$target_dir/classes" ]; then
+            classes="$target_dir/classes"
+          else
+            classes=$(find "$target_dir" -type d -path '*/classes' -print | head -n 1 || true)
+          fi
+          if [ -z "$classes" ]; then
+            echo "Unable to locate compiled classes in downloaded artifacts" >&2
+            exit 1
+          fi
+
+          jacoco=""
+          for candidate in \
+            "$target_dir/site/jacoco/jacoco.xml" \
+            "$target_dir/site/jacoco-aggregate/jacoco.xml"
+          do
+            if [ -f "$candidate" ]; then
+              jacoco="$candidate"
+              break
+            fi
+          done
+          if [ -z "$jacoco" ]; then
+            jacoco=$(find "$target_dir" -type f -name 'jacoco*.xml' -print | head -n 1 || true)
+          fi
+          if [ -z "$jacoco" ]; then
+            echo "Unable to locate JaCoCo XML report in downloaded artifacts" >&2
+            exit 1
+          fi
+
+          if [[ "$classes" == "$project_dir"/* ]]; then
+            classes=${classes#$project_dir/}
+          else
+            echo "Compiled classes are not under $project_dir" >&2
+            exit 1
+          fi
+
+          if [[ "$jacoco" == "$project_dir"/* ]]; then
+            jacoco=${jacoco#$project_dir/}
+          else
+            echo "JaCoCo report is not under $project_dir" >&2
+            exit 1
+          fi
+
+          echo "classes=${classes}" >> "$GITHUB_OUTPUT"
+          echo "jacoco=${jacoco}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare Sonar PR context
+        id: sonar-context
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "args=-Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.head_ref }} -Dsonar.pullrequest.base=${{ github.base_ref }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: SonarCloud Scan (backend)
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACK }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.organization=${{ env.SONAR_ORG }}
+            -Dsonar.projectKey=${{ env.SONAR_BACKEND_PROJECT_KEY }}
+            -Dsonar.projectBaseDir=back
+            -Dsonar.sources=src/main
+            -Dsonar.tests=src/test/java
+            -Dsonar.java.binaries=${{ steps.backend-inputs.outputs.classes }}
+            -Dsonar.coverage.jacoco.xmlReportPaths=${{ steps.backend-inputs.outputs.jacoco }}
+            ${{ steps.sonar-context.outputs.args }}
+
+  sonar-frontend:
+    name: Frontend · SonarCloud
+    needs: frontend
+    if: needs.frontend.result == 'success' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download frontend artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-artifacts
+          path: .
+
+      - name: Locate lcov report
+        id: cov
+        run: |
+          set -euo pipefail
+          if [ -d front/coverage ]; then
+            lcov=$(find front/coverage -type f -name "lcov.info" -print | head -n 1 || true)
+          else
+            lcov=""
+          fi
+          echo "lcov=${lcov}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare Sonar PR context
+        id: sonar-context
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "args=-Dsonar.pullrequest.key=${{ github.event.pull_request.number }} -Dsonar.pullrequest.branch=${{ github.head_ref }} -Dsonar.pullrequest.base=${{ github.base_ref }}" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: SonarCloud Scan (frontend)
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.organization=${{ env.SONAR_ORG }}
+            -Dsonar.projectKey=${{ env.SONAR_FRONTEND_PROJECT_KEY }}
+            -Dsonar.projectBaseDir=front
+            -Dsonar.sources=src
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.spec.ts,**/*.test.ts,**/*.spec.tsx,**/*.test.tsx
+            ${{ steps.cov.outputs.lcov && format('-Dsonar.javascript.lcov.reportPaths={0}', steps.cov.outputs.lcov) || '' }}
+            ${{ steps.cov.outputs.lcov && format('-Dsonar.typescript.lcov.reportPaths={0}', steps.cov.outputs.lcov) || '' }}
+            ${{ steps.sonar-context.outputs.args }}

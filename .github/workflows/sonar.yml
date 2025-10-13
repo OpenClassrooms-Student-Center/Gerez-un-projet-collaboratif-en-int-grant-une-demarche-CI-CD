@@ -78,7 +78,14 @@ jobs:
           for c in "target/classes" "build/classes/java/main" "build/classes/kotlin/main"; do
             [ -d "$c" ] && classes="$c" && break
           done
-          report=$(find . -type f -name "*.xml" \( -path "*/jacoco/*" -o -path "*/reports/jacoco/*" \) -print | head -n 1 || true)
+          report=""
+          if [ -f "target/site/jacoco/jacoco.xml" ]; then
+            report="target/site/jacoco/jacoco.xml"
+          elif [ -f "build/reports/jacoco/test/jacocoTestReport.xml" ]; then
+            report="build/reports/jacoco/test/jacocoTestReport.xml"
+          else
+            report=$(find . -type f -name "*.xml" \( -path "*/jacoco/*" -o -path "*/reports/jacoco/*" \) -print | head -n 1 || true)
+          fi
           echo "classes=${classes}" >> "$GITHUB_OUTPUT"
           echo "report=${report}"   >> "$GITHUB_OUTPUT"
 
@@ -94,7 +101,7 @@ jobs:
             -Dsonar.projectKey=${{ env.SONAR_BACKEND_PROJECT_KEY }}
             -Dsonar.projectBaseDir=${{ steps.detect.outputs.dir }}
             -Dsonar.sources=src/main
-            -Dsonar.tests=src/test
+            -Dsonar.tests=src/test/java
             -Dsonar.java.binaries=${{ steps.paths.outputs.classes }}
             ${{ steps.paths.outputs.report && format('-Dsonar.coverage.jacoco.xmlReportPaths={0}', steps.paths.outputs.report) || '' }}
 
@@ -132,6 +139,10 @@ jobs:
         if: steps.detect.outputs.root != ''
         working-directory: ${{ steps.detect.outputs.root }}
         run: npm ci
+
+      - name: Set up Chrome
+        if: steps.detect.outputs.root != ''
+        uses: browser-actions/setup-chrome@v1
 
       - name: Run frontend tests with coverage
         if: steps.detect.outputs.root != ''

@@ -1,0 +1,181 @@
+name: SonarCloud Quality
+
+on:
+  workflow_run:
+    workflows: ["Tests & Coverage"]
+    types:
+      - completed
+
+permissions:
+  contents: read
+  pull-requests: read
+  actions: read
+
+env:
+  SONAR_HOST_URL: https://sonarcloud.io
+  SONAR_ORG: bem92
+  SONAR_BACKEND_PROJECT_KEY: ${{ vars.SONAR_BACKEND_PROJECT_KEY || 'back-bob-app' }}
+  SONAR_FRONTEND_PROJECT_KEY: ${{ vars.SONAR_FRONTEND_PROJECT_KEY || 'front-bob-app' }}
+
+jobs:
+  sonar-backend:
+    name: Backend · SonarCloud
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Download backend artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-artifacts
+          run-id: ${{ github.event.workflow_run.id }}
+          path: .
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Locate backend coverage inputs
+        id: backend-inputs
+        working-directory: back
+        run: |
+          set -euo pipefail
+          if [ ! -d target ]; then
+            echo "No backend target directory found in artifacts" >&2
+            exit 1
+          fi
+          if [ -d target/classes ]; then
+            classes="target/classes"
+          else
+            classes=$(find target -type d -path '*/classes' -print | head -n 1 || true)
+          fi
+          if [ -z "$classes" ]; then
+            echo "Unable to locate compiled classes in downloaded artifacts" >&2
+            exit 1
+          fi
+          jacoco=""
+          for candidate in \
+            target/site/jacoco/jacoco.xml \
+            target/site/jacoco-aggregate/jacoco.xml
+          do
+            if [ -f "$candidate" ]; then
+              jacoco="$candidate"
+              break
+            fi
+          done
+          if [ -z "$jacoco" ]; then
+            jacoco=$(find target -type f -name 'jacoco*.xml' -print | head -n 1 || true)
+          fi
+          if [ -z "$jacoco" ]; then
+            echo "Unable to locate JaCoCo XML report in downloaded artifacts" >&2
+            exit 1
+          fi
+          echo "classes=${classes}" >> "$GITHUB_OUTPUT"
+          echo "jacoco=${jacoco}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare Sonar PR context
+        id: sonar-context
+        run: |
+          set -euo pipefail
+          cat <<'JSON' > run.json
+          ${{ toJson(github.event.workflow_run) }}
+          JSON
+          pr_number=$(jq -r '.pull_requests[0].number // empty' run.json)
+          pr_head=$(jq -r '.pull_requests[0].head.ref // empty' run.json)
+          pr_base=$(jq -r '.pull_requests[0].base.ref // empty' run.json)
+          rm run.json
+          if [ -n "$pr_number" ]; then
+            echo "args=-Dsonar.pullrequest.key=$pr_number -Dsonar.pullrequest.branch=$pr_head -Dsonar.pullrequest.base=$pr_base" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: SonarCloud Scan (backend)
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_BACK }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.organization=${{ env.SONAR_ORG }}
+            -Dsonar.projectKey=${{ env.SONAR_BACKEND_PROJECT_KEY }}
+            -Dsonar.projectBaseDir=back
+            -Dsonar.sources=src/main
+            -Dsonar.tests=src/test/java
+            -Dsonar.java.binaries=${{ steps.backend-inputs.outputs.classes }}
+            -Dsonar.coverage.jacoco.xmlReportPaths=${{ steps.backend-inputs.outputs.jacoco }}
+            ${{ steps.sonar-context.outputs.args }}
+
+  sonar-frontend:
+    name: Frontend · SonarCloud
+    if: |
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_repository.fork == false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Download frontend artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-artifacts
+          run-id: ${{ github.event.workflow_run.id }}
+          path: .
+
+      - name: Locate lcov report
+        id: cov
+        run: |
+          set -euo pipefail
+          if [ -d front/coverage ]; then
+            lcov=$(find front/coverage -type f -name "lcov.info" -print | head -n 1 || true)
+          else
+            lcov=""
+          fi
+          echo "lcov=${lcov}" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare Sonar PR context
+        id: sonar-context
+        run: |
+          set -euo pipefail
+          cat <<'JSON' > run.json
+          ${{ toJson(github.event.workflow_run) }}
+          JSON
+          pr_number=$(jq -r '.pull_requests[0].number // empty' run.json)
+          pr_head=$(jq -r '.pull_requests[0].head.ref // empty' run.json)
+          pr_base=$(jq -r '.pull_requests[0].base.ref // empty' run.json)
+          rm run.json
+          if [ -n "$pr_number" ]; then
+            echo "args=-Dsonar.pullrequest.key=$pr_number -Dsonar.pullrequest.branch=$pr_head -Dsonar.pullrequest.base=$pr_base" >> "$GITHUB_OUTPUT"
+          else
+            echo "args=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: SonarCloud Scan (frontend)
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}
+          SONAR_HOST_URL: ${{ env.SONAR_HOST_URL }}
+        with:
+          args: >
+            -Dsonar.organization=${{ env.SONAR_ORG }}
+            -Dsonar.projectKey=${{ env.SONAR_FRONTEND_PROJECT_KEY }}
+            -Dsonar.projectBaseDir=front
+            -Dsonar.sources=src
+            -Dsonar.tests=src
+            -Dsonar.test.inclusions=**/*.spec.ts,**/*.test.ts,**/*.spec.tsx,**/*.test.tsx
+            ${{ steps.cov.outputs.lcov && format('-Dsonar.javascript.lcov.reportPaths={0}', steps.cov.outputs.lcov) || '' }}
+            ${{ steps.cov.outputs.lcov && format('-Dsonar.typescript.lcov.reportPaths={0}', steps.cov.outputs.lcov) || '' }}
+            ${{ steps.sonar-context.outputs.args }}

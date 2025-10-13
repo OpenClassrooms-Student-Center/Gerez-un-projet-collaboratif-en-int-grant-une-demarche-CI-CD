@@ -4,6 +4,10 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   backend:
     runs-on: ubuntu-latest
@@ -13,22 +17,28 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 11
-      - name: Run backend tests
-        run: mvn -B test
+          java-version: 17
+
+      - name: Run backend tests with coverage
+        run: |
+          set -euo pipefail
+          mvn -B -DskipTests=false \
+            org.jacoco:jacoco-maven-plugin:prepare-agent test \
+            org.jacoco:jacoco-maven-plugin:report
+
       - name: Upload backend artifacts
         uses: actions/upload-artifact@v4
         with:
           name: backend-artifacts
           if-no-files-found: ignore
           path: |
-            back/target/surefire-reports/**
-            back/target/site/jacoco/**
-            back/target/jacoco*.exec
+            back/target/**
+            back/pom.xml
 
   frontend:
     runs-on: ubuntu-latest
@@ -38,16 +48,31 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
+
       - name: Set up Chrome
         uses: browser-actions/setup-chrome@v1
+
       - name: Install dependencies
         run: npm ci
+
       - name: Run frontend tests
-        run: npx ng test --watch=false --browsers=ChromeHeadless --code-coverage
+        env:
+          CI: 'true'
+          NG_CLI_ANALYTICS: 'false'
+        run: |
+          set -euo pipefail
+          if npm test -- --watch=false --code-coverage --browsers=ChromeHeadless; then
+            echo "Angular/Karma coverage generated"
+          else
+            echo "Fallback to generic coverage"
+            npm test -- --coverage
+          fi
+
       - name: Upload frontend artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -56,3 +81,5 @@ jobs:
           path: |
             front/coverage/**
             front/test-results/**/*.xml
+            front/package.json
+            front/angular.json

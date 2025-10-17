@@ -16,8 +16,6 @@ module.exports = function (config) {
       jasmine: {
         // you can add configuration options for Jasmine here
         // the possible options are listed at https://jasmine.github.io/api/edge/Configuration.html
-        // for example, you can disable the random execution with `random: false`
-        // or set a specific seed with `seed: 4321`
       },
       clearContext: false // leave Jasmine Spec Runner output visible in browser
     },
@@ -29,6 +27,7 @@ module.exports = function (config) {
       subdir: '.',
       reporters: [
         { type: 'html' },
+        { type: 'lcovonly' },
         { type: 'text-summary' }
       ]
     },
@@ -36,9 +35,25 @@ module.exports = function (config) {
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
-    autoWatch: true,
-    browsers: ['Chrome'],
-    singleRun: false,
-    restartOnFileChange: true
+    autoWatch: false, // désactivé pour CI
+    browsers: ['ChromeHeadlessNoSandbox'], // utilisation du mode headless
+    singleRun: true, // exécution unique pour CI
+    restartOnFileChange: false,
+
+    // 👇 ajout du custom launcher pour GitHub Actions
+    customLaunchers: {
+      ChromeHeadlessNoSandbox: {
+        base: 'ChromeHeadless',
+        flags: [
+          '--no-sandbox',
+          '--disable-gpu',
+          '--disable-dev-shm-usage',
+          '--disable-setuid-sandbox',
+          '--disable-software-rasterizer',
+          '--headless',
+          '--remote-debugging-port=9222'
+        ]
+      }
+    }
   });
 };

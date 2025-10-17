@@ -1,0 +1,52 @@
+name: CI - Tests Front-End
+
+on:
+  push:
+    branches:
+      - main
+      - 2025.9
+  pull_request:
+    branches:
+      - main
+      - 2025.9
+
+jobs:
+  test-front:
+    name: Tests du front-end (Angular)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: front/package-lock.json
+
+      - name: Installation des dépendances
+        working-directory: front
+        run: npm install
+
+      - name: Lancement des tests + couverture
+        working-directory: front
+        run: npm run test -- --watch=false --code-coverage
+
+      - name: Upload du rapport de couverture
+        uses: actions/upload-artifact@v4
+        with:
+          name: angular-coverage
+          path: front/coverage/bobapp/
+
+      - name: Install SonarScanner CLI
+        run: |
+          npm install -g sonar-scanner
+
+      - name: Analyse SonarCloud
+        run: |
+          cd front
+          sonar-scanner -Dproject.settings=sonar-project.properties
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_FRONT }}

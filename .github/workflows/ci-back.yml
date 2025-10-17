@@ -1,0 +1,54 @@
+name: CI - Tests Back-End
+
+on:
+  push:
+    branches:
+      - main
+      - 2025.9
+  pull_request:
+    branches:
+      - main
+      - 2025.9
+
+jobs:
+  test-back:
+    name: Tests du back-end (Spring Boot)
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: back
+
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build du back-end et exécution des tests
+        run: mvn -B clean verify
+
+      - name: Génération du rapport JaCoCo
+        run: mvn jacoco:report
+
+      - name: Upload du rapport de couverture
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: back/target/site/jacoco/
+
+      - name: Analyse SonarCloud
+        uses: SonarSource/sonarcloud-github-action@master
+        with:
+          args: >
+            -Dproject.settings=back/sonar-project.properties
+            -Dsonar.projectBaseDir=back
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_BACK }}
+          
+

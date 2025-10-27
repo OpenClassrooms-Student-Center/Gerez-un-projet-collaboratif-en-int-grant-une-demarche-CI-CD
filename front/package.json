@@ -1,14 +1,15 @@
 {
   "name": "bobapp",
   "version": "0.0.0",
+  "private": true,
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "test:ci": "ng test --watch=false --browsers=ChromeHeadlessCI --code-coverage"
   },
-  "private": true,
   "dependencies": {
     "@angular/animations": "14.2.0",
     "@angular/cdk": "^14.2.0",
@@ -35,6 +36,8 @@
     "karma-coverage": "2.2.0",
     "karma-jasmine": "5.1.0",
     "karma-jasmine-html-reporter": "2.0.0",
+    "karma-junit-reporter": "^2.0.1",
+    "puppeteer": "^24.24.1",
     "typescript": "4.8.2"
   }
 }

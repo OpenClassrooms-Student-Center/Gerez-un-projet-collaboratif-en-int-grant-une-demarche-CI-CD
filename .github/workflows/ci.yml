@@ -1,0 +1,143 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  front:
+    name: Front-end CI
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: "front/package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build --if-present
+
+      - name: Test (headless via Puppeteer)
+        run: npm run test:ci
+
+      - name: Debug - list front outputs
+        run: |
+          pwd
+          ls -la
+          ls -la reports || true
+          ls -la coverage || true
+
+      # Affichage des tests FRONT dans l'UI GitHub (JUnit XML)
+      - name: Test Report (Front)
+        uses: phoenix-actions/test-reporting@v15
+        if: success() || failure()
+        with:
+          name: "Front - Karma/Jasmine"
+          working-directory: "front"
+          path: "reports/**/*.xml"
+          reporter: "java-junit"
+
+      # Uploade la couverture Angular (HTML)
+      - name: Upload Front Coverage
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: front-coverage
+          path: front/coverage/bobapp/**
+
+  back:
+    name: Back-end CI
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: back
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: maven
+
+      - name: Maven verify (tests + JaCoCo)
+        run: mvn -B clean verify
+
+      # Affichage des tests BACK dans l'UI GitHub (JUnit XML)
+      - name: Test Report (Back)
+        uses: phoenix-actions/test-reporting@v15
+        if: success() || failure()
+        with:
+          name: "Back - JUnit"
+          path: "back/target/surefire-reports/*.xml"
+          reporter: "java-junit"
+
+      # Uploade JaCoCo HTML & XML
+      - name: Upload Back JaCoCo Report
+        uses: actions/upload-artifact@v4
+        if: success() || failure()
+        with:
+          name: back-jacoco
+          path: |
+            back/target/site/jacoco/**
+            back/target/site/jacoco/jacoco.xml
+
+  sonar:
+    name: SonarCloud Scan
+    runs-on: ubuntu-latest
+    needs: [front, back]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+  
+      # --- BACK: compiler + tests pour générer classes + jacoco.xml
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: temurin
+  
+      - name: Build back (tests + JaCoCo)
+        run: mvn -B -f back/pom.xml clean verify
+        # produit:
+        #   back/target/classes
+        #   back/target/site/jacoco/jacoco.xml
+  
+      # --- FRONT: tests avec couverture pour lcov.info
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: "npm"
+          cache-dependency-path: "front/package-lock.json"
+  
+      - name: Install front deps
+        working-directory: front
+        run: npm ci
+  
+      - name: Test front (headless + coverage)
+        working-directory: front
+        run: npm run test:ci -- --code-coverage
+        # produit: front/coverage/bobapp/lcov.info
+  
+      # --- Scan Sonar
+      - name: Sonar scan (front + back)
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        # with:
+        #   args: -Dsonar.qualitygate.wait=true

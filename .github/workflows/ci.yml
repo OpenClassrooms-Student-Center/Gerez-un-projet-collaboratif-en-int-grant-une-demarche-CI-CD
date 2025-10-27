@@ -4,6 +4,8 @@ on:
   push:
     branches: ["**"]
   pull_request:
+    branches:
+        - main
 
 permissions:
   contents: read
@@ -13,6 +15,7 @@ permissions:
 jobs:
   # ---------- FRONT: tests + coverage -> ARTIFACTS ----------
   front-tests:
+    if: ${{ github.event_name == 'pull_request'}}
     name: Front tests & coverage (artifact)
     runs-on: ubuntu-latest
     defaults:
@@ -48,6 +51,7 @@ jobs:
 
   # ---------- BACK: tests + JaCoCo -> ARTIFACTS ----------
   back-tests:
+    if: ${{ github.event_name == 'pull_request'}}
     name: Back tests & coverage (artifact)
     runs-on: ubuntu-latest
     defaults:

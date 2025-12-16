@@ -22,11 +22,11 @@ Launch Front-end:
 
 Build the container:
 
-> docker build -t bobapp-front .  
+> docker build -t antoinelm/bobapp-front:latest .  
 
 Start the container:
 
-> docker run -p 8080:8080 --name bobapp-front -d bobapp-front
+> docker run -p 80:80 --name bobapp-front -d antoinelm/bobapp-front:latest
 
 ## Back-end
 
@@ -50,8 +50,8 @@ Launch the tests:
 
 Build the container:
 
-> docker build -t bobapp-back .  
+> docker build -t antoinelm/bobapp-back:latest . 
 
 Start the container:
 
-> docker run -p 8080:8080 --name bobapp-back -d bobapp-back 
+> docker run -p 8080:8080 --name bobapp-back -d antoinelm/bobapp-back:latest

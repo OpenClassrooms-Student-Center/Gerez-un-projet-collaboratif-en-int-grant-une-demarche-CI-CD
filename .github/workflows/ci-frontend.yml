@@ -1,0 +1,69 @@
+name: CI Frontend
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths: [ 'front/**', '.github/workflows/**' ]
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  test-frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+
+      - name: Install frontend dependencies
+        working-directory: ./front
+        run: npm install
+
+      - name: Run frontend tests
+        working-directory: ./front
+        run: npm test -- --watch=false --browsers=ChromeHeadless --code-coverage
+
+      - name: Upload frontend coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: ./front/coverage
+  
+  sonarcloud:
+    runs-on: ubuntu-latest
+    needs: [test-frontend]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js for frontend
+        uses: actions/setup-node@v4
+        with:
+          node-version: '16'
+
+      - name: Install frontend dependencies
+        working-directory: ./front
+        run: npm ci
+
+      - name: Run frontend tests with coverage
+        working-directory: ./front
+        run: npm test -- --watch=false --browsers=ChromeHeadless --code-coverage
+
+      - name: SonarCloud Scan for Frontend
+        uses: SonarSource/sonarcloud-github-action@v3
+        with:
+          projectBaseDir: front
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}

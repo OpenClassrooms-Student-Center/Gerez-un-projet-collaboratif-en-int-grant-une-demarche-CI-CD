@@ -15,6 +15,8 @@
 	<description>L'application de joke par excellence !</description>
 	<properties>
 		<java.version>11</java.version>
+		<sonar.projectName>BobApp Backend</sonar.projectName>
+		<sonar.projectKey>Antoine-Heu_BobApp_backend</sonar.projectKey>
 	</properties>
 	<dependencies>
 		<dependency>

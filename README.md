@@ -1,57 +1,77 @@
-# BobApp
+# 🚀 BobApp
 
-Clone project:
+BobApp is a web application that allows users to consult and share jokes.
 
-> git clone XXXXX
+The project is built with:
+- 🖥️ Backend: Java Spring Boot  
+- 🌐 Frontend: Angular  
 
-## Front-end 
+This project demonstrates the implementation of a **CI/CD pipeline** using GitHub Actions, SonarCloud, and Docker.
 
-Go inside folder the front folder:
+---
 
-> cd front
+## ⚙️ CI/CD Features
 
-Install dependencies:
+- ✅ Automated tests (backend & frontend)
+- 📊 Code quality analysis with SonarCloud (Quality Gate)
+- 📦 Docker image build (frontend & backend)
+- 🚀 Automatic push to DockerHub
 
-> npm install
+---
 
-Launch Front-end:
+## 📥 Clone the project
 
-> npm run start;
+```bash
+git clone XXXXX
+cd bobapp
+```
+---
 
-### Docker
+## 🖥️ Run Frontend
+```bash
+cd front
+npm install
+npm run start
+```
+---
+## ⚙️ Run Backend
+```bash
+cd back
+mvn clean install
+mvn spring-boot:run
+```
+---
+## 🧪 Run tests
+```bash
+mvn clean verify
+npm run test
+```
+---
+## 🐳 Docker
+**Build images**
+```bash
+docker build -t bobapp-front ./front
+docker build -t bobapp-back ./back
+```
 
-Build the container:
+**Run containers**
+```bash
+docker run -p 8080:8080 --name bobapp-front -d bobapp-front
+docker run -p 8080:8080 --name bobapp-back -d bobapp-back
+```
+---
 
-> docker build -t bobapp-front .  
+## 📄 Documentation
 
-Start the container:
+The project documentation is available here:
 
-> docker run -p 8080:8080 --name bobapp-front -d bobapp-front
+👉 [View documentation](docs/documentation.pdf)
 
-## Back-end
+---
+## 📌 Notes
 
-Go inside folder the back folder:
+This project was developed as part of a training project to implement CI/CD practices and DevOps tools.
 
-> cd back
-
-Install dependencies:
-
-> mvn clean install
-
-Launch Back-end:
-
->  mvn spring-boot:run
-
-Launch the tests:
-
-> mvn clean install
-
-### Docker
-
-Build the container:
-
-> docker build -t bobapp-back .  
-
-Start the container:
-
-> docker run -p 8080:8080 --name bobapp-back -d bobapp-back 
+---
+## 👤 Author
+Julio Daniel GIL CANO

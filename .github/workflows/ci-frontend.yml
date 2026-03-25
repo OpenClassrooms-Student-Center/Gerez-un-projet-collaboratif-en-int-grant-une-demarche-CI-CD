@@ -1,0 +1,48 @@
+name: CI Frontend
+
+
+on:
+  push:
+    paths:
+      - 'front/**'
+    branches: [ "feature/*", "release/*", "hotfix/*", "develop" ]      
+  pull_request:
+    paths:
+      - 'front/**'
+    branches: [ main ]
+    types: [ opened, synchronize, reopened ]
+    
+jobs:
+  build-test-sonar:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: front
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - run: npm ci
+
+      - name: Run tests
+        run: npm run test -- --watch=false --code-coverage
+
+      - name: Upload coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: front-coverage
+          path: front/coverage
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@v2
+        with:
+          projectBaseDir: front
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONT }}

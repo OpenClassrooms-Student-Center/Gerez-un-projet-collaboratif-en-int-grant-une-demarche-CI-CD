@@ -8,7 +8,7 @@ import { Joke } from '../model/joke.model';
 })
 export class JokesService {
 
-  private pathService = 'api/joke';
+  private pathService = '/api/joke';
 
   private subject: BehaviorSubject<Joke | null> = new BehaviorSubject<Joke | null>(null);
 
@@ -23,4 +23,5 @@ export class JokesService {
   public joke$(): Observable<Joke | null > {
     return this.subject.asObservable();
   }
+
 }

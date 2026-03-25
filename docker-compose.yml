@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+
+  back:
+    build: ./back
+    container_name: bobapp-back
+    ports:
+      - "8080:8080"
+
+  front:
+    build: ./front
+    container_name: bobapp-front
+    ports:
+      - "4200:80"
+    depends_on:
+      - back

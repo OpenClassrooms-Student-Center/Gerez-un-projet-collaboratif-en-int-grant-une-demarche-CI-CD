@@ -1,0 +1,21 @@
+name: bobapp-ci
+
+on:
+    push:
+        branches: [main]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+
+jobs:
+    echo:
+        name: echo hello world
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout repo
+              uses: actions/checkout@v4  
+            - name: echo
+              run: echo "Hello world"
+            - name: list files
+              run: ls -la 
+            

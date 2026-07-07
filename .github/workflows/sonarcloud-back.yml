@@ -1,0 +1,51 @@
+name: SonarCloud Back
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - back/**
+      - .github/workflows/sonarcloud-back.yml
+  pull_request:
+    branches:
+      - main
+    paths:
+      - back/**
+      - .github/workflows/sonarcloud-back.yml
+
+jobs:
+  sonarcloud-back:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: '11'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Run backend tests with JaCoCo
+        run: mvn -B -f back/pom.xml clean test jacoco:report
+
+      - name: SonarCloud scan for backend
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          args: >
+            -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY_BACK }}
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.sources=back/src/main/java
+            -Dsonar.tests=back/src/test/java
+            -Dsonar.java.binaries=back/target/classes
+            -Dsonar.junit.reportPaths=back/target/surefire-reports
+            -Dsonar.coverage.jacoco.xmlReportPaths=back/target/site/jacoco/jacoco.xml
+            -Dsonar.exclusions=**/target/**
